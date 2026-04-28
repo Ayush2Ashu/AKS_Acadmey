@@ -5,3 +5,4 @@ xhtml2pdf
 qrcode
 Pillow
 Werkzeug
+gunicorn
