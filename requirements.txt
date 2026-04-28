@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+Flask-Mail
+xhtml2pdf
+qrcode
+Pillow
+Werkzeug

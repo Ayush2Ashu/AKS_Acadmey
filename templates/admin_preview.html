@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile | AKS Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; color: #2b3440; }
+        .navbar { background: #001d3d !important; border-bottom: 4px solid #00d4ff; }
+        .navbar-brand { font-weight: 800; letter-spacing: 1.5px; color: #ffffff !important; }
+        
+        .preview-card { background: white; border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        .data-label { color: #6c757d; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
+        .data-value { font-size: 1.05rem; font-weight: 700; color: #212529; margin-bottom: 15px; word-wrap: break-word;}
+        
+        .section-header { font-size: 1.1rem; font-weight: 800; color: #003566; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; margin-bottom: 20px; margin-top: 10px; }
+        
+        .aadhar-view { border: 2px dashed #003566; border-radius: 10px; max-width: 100%; height: auto; }
+        .data-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-bottom: 30px; height: 100%;}
+        .data-card-title { color: #003566; font-weight: 800; font-size: 1.1rem; border-bottom: 2px solid #f4f7f6; padding-bottom: 15px; margin-bottom: 20px; display: flex; align-items: center;}
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark mb-5">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/admin">
+                <i class="fas fa-shield-alt text-info me-2"></i> 
+                {% if session.get('admin_logged_in') %}AKS ADMIN CENTER{% else %}AKS STAFF PORTAL{% endif %}
+            </a>
+            <div class="ms-auto">
+                <a href="/admin" class="btn btn-outline-light btn-sm rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>Back to Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                <div class="preview-card p-4 p-md-5">
+                    
+                    <div class="text-center mb-5 border-bottom pb-4">
+                        <img src="/static/uploads/students/{{ enroll.student_image }}" class="rounded-circle shadow border border-3 border-primary mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                        <h2 class="fw-bold mb-1">{{ enroll.student|upper }}</h2>
+                        <p class="text-muted mb-2 fw-bold">Roll Number: <span class="text-dark">AKS-2026-{{ "%05d" | format(enroll.id) }}</span> • Date: {{ enroll.admission_date }}</p>
+                        
+                        {% if enroll.status == 'Pending' %}
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fs-6"><i class="fas fa-clock me-1"></i> Pending Approval</span>
+                        {% elif enroll.status == 'Approved' %}
+                            <span class="badge bg-success px-3 py-2 rounded-pill fs-6"><i class="fas fa-check-circle me-1"></i> Active Student</span>
+                        {% elif enroll.status == 'Completed' %}
+                            <span class="badge bg-info text-white px-3 py-2 rounded-pill fs-6 border border-info"><i class="fas fa-graduation-cap me-1"></i> Course Completed</span>
+                        {% else %}
+                            <span class="badge bg-danger px-3 py-2 rounded-pill fs-6"><i class="fas fa-times-circle me-1"></i> Rejected</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-2 mb-4">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                          {% if messages %}
+                            {% for category, message in messages %}
+                              <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm rounded-pill px-4 fw-bold" role="alert">
+                                <i class="fas fa-info-circle me-2"></i> {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                              </div>
+                            {% endfor %}
+                          {% endif %}
+                        {% endwith %}
+                    </div>
+
+                    <div class="data-card mb-5 border-top border-secondary border-4 bg-light">
+                        <h4 class="data-card-title justify-content-center border-0 text-secondary mb-4"><i class="fas fa-id-card me-2"></i>Student KYC Verification</h4>
+                        <div class="text-center">
+                            
+                            {% if enroll.aadhar_card and enroll.aadhar_card.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif')) %}
+                                <a href="/static/uploads/students/{{ enroll.aadhar_card }}" target="_blank">
+                                    <img src="/static/uploads/students/{{ enroll.aadhar_card }}" class="aadhar-view shadow-sm bg-white p-2" style="max-width: 600px; width: 100%;" alt="Aadhar Card">
+                                </a>
+                                <p class="text-center text-muted small fw-bold mt-3 mb-1">File Reference: {{ enroll.aadhar_card }}</p>
+                                <small class="text-primary"><i class="fas fa-search-plus me-1"></i> Click image to open in full size</small>
+                            
+                            {% elif enroll.aadhar_card %}
+                                <div class="alert alert-success fw-bold py-4 border-success d-inline-block px-5 bg-white shadow-sm">
+                                    <i class="fas fa-file-pdf fa-4x mb-3 text-danger"></i><br>
+                                    <span class="fs-5">Aadhar Document (PDF)</span><br>
+                                    <small class="text-muted fw-normal">Stored securely in the digital vault.</small><br>
+                                    <a href="/static/uploads/students/{{ enroll.aadhar_card }}" target="_blank" class="btn btn-success mt-3 rounded-pill fw-bold px-4">Open PDF Document</a>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-danger fw-bold py-4 d-inline-block px-5">
+                                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>No Aadhar Provided!
+                                </div>
+                            {% endif %}
+                            
+                        </div>
+                    </div>
+
+                    <div class="row g-5 mb-5">
+                        
+                        <div class="col-md-7 border-end pe-md-5">
+                            
+                            <div class="section-header"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Course & Payment Details</div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="data-label">Selected Course Plan</div>
+                                    <div class="data-value text-primary fs-5">{{ enroll.course }}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Academic Session</div>
+                                    <div class="data-value">{{ enroll.session_year }}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Current Payment Plan</div>
+                                    <div class="data-value">{{ enroll.payment_plan }}</div>
+                                </div>
+                            </div>
+
+                            <div class="section-header mt-4"><i class="fas fa-user text-primary me-2"></i>Personal Information</div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="data-label">Date of Birth</div>
+                                    <div class="data-value">{{ enroll.dob }}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Gender</div>
+                                    <div class="data-value">{{ enroll.gender }}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Father's Name</div>
+                                    <div class="data-value">{{ enroll.father_name }}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Mother's Name</div>
+                                    <div class="data-value">{{ enroll.mother_name }}</div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="data-label">Application Source</div>
+                                    <div class="data-value">{{ enroll.source }}</div>
+                                </div>
+                            </div>
+
+                            <div class="section-header mt-4"><i class="fas fa-map-marked-alt text-primary me-2"></i>Contact & Address</div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="data-label">Student Phone (WhatsApp)</div>
+                                    <div class="data-value"><i class="fab fa-whatsapp text-success me-1"></i> {{ enroll.student_phone }}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Parent's Phone</div>
+                                    <div class="data-value"><i class="fas fa-phone-alt text-secondary me-1"></i> {{ enroll.parent_phone }}</div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="data-label">Email Address</div>
+                                    <div class="data-value">{{ enroll.student_email }}</div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="data-label">Permanent Address</div>
+                                    <div class="data-value mb-1">{{ enroll.permanent_address }}</div>
+                                </div>
+                                <div class="col-sm-6 mt-2">
+                                    <div class="data-label">Local Address</div>
+                                    <div class="data-value">{{ enroll.local_address or 'N/A' }}</div>
+                                </div>
+                                <div class="col-sm-6 mt-2">
+                                    <div class="data-label">Pincode</div>
+                                    <div class="data-value">{{ enroll.pincode }}</div>
+                                </div>
+                            </div>
+
+                            <div class="section-header mt-4"><i class="fas fa-book text-primary me-2"></i>Academic Records</div>
+                            <div class="row">
+                                {% if enroll.current_board and enroll.current_board != 'N/A' %}
+                                <div class="col-12 mb-3 pb-2 border-bottom">
+                                    <div class="data-label text-info mb-2">Current Education</div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="data-label">Current Board</div>
+                                            <div class="data-value">{{ enroll.current_board }}</div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="data-label">Current School</div>
+                                            <div class="data-value">{{ enroll.current_school }}</div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="data-label">JEE/NEET Prep</div>
+                                            <div class="data-value">{{ enroll.add_jee_neet }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                {% if enroll.subjects and enroll.subjects != 'N/A' %}
+                                <div class="col-12 mb-3 pb-2 border-bottom">
+                                    <div class="data-label text-info">Core Subjects Chosen</div>
+                                    <div class="data-value text-primary mt-1">{{ enroll.subjects }}</div>
+                                </div>
+                                {% endif %}
+
+                                <div class="col-12"><div class="data-label text-info mb-2">Previous Qualifications</div></div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Previous Board</div>
+                                    <div class="data-value">{{ enroll.prev_board }}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="data-label">Previous School</div>
+                                    <div class="data-value">{{ enroll.prev_school }}</div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="data-label">Passing Year</div>
+                                    <div class="data-value">{{ enroll.prev_year }}</div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="data-label">Marks</div>
+                                    <div class="data-value">{{ enroll.prev_marks }}</div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="data-label">Percentage</div>
+                                    <div class="data-value">{{ enroll.prev_percentage }}%</div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="data-label">Division</div>
+                                    <div class="data-value">{{ enroll.prev_division }}</div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-5">
+                            
+                            <div class="data-card bg-primary bg-opacity-10 border border-primary border-opacity-25 mb-4" style="height: auto;">
+                                <h4 class="data-card-title text-primary"><i class="fas fa-file-invoice-dollar me-2"></i> Financial Summary</h4>
+                                
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="lbl">Base Course Fee</div>
+                                    <div class="val fs-6 text-dark mb-0">₹{{ '{:,}'.format(enroll.total_fee) }}</div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom border-primary border-opacity-25">
+                                    <div class="lbl text-success">Scholarship Applied</div>
+                                    {% if enroll.discount_applied != "None" %}
+                                        <div class="val fs-6 text-success fw-bold mb-0">- {{ enroll.discount_applied }}</div>
+                                    {% else %}
+                                        <div class="val fs-6 text-muted mb-0">None</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="lbl">Net Payable Fee</div>
+                                <div class="val fs-3 text-dark fw-bold mb-3">₹{{ '{:,}'.format(enroll.payable_fee) }}</div>
+
+                                {% set outstanding = enroll.payable_fee - enroll.amount_paid %}
+                                {% if outstanding < 0 %}{% set outstanding = 0 %}{% endif %}
+
+                                <div class="lbl">Amount Paid So Far</div>
+                                <div class="val fs-5 text-success fw-bold mb-3">₹{{ '{:,}'.format(enroll.amount_paid) }}</div>
+
+                                <div class="lbl text-danger">Total Outstanding Balance</div>
+                                <div class="val fs-4 text-danger fw-bold border-bottom border-danger border-opacity-25 pb-3 mb-3">₹{{ '{:,}'.format(outstanding) }}</div>
+
+                                {% if '3 Month' in enroll.payment_plan %}
+                                    {% set emi_amount = (enroll.payable_fee / 3)|round|int %}
+                                {% elif '6 Month' in enroll.payment_plan %}
+                                    {% set emi_amount = (enroll.payable_fee / 6)|round|int %}
+                                {% else %}
+                                    {% set emi_amount = enroll.payable_fee %}
+                                {% endif %}
+
+                                <h6 class="fw-bold text-primary mt-2 mb-3"><i class="fas fa-calendar-alt me-2"></i>Payment Schedule <span class="badge bg-primary ms-1">{{ enroll.payment_plan }}</span></h6>
+                                <div class="bg-white p-3 rounded-3 shadow-sm mb-3 border border-light">
+                                    {% if '3 Month' in enroll.payment_plan or '6 Month' in enroll.payment_plan %}
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="small fw-bold text-muted">Fixed Installment Plan</span>
+                                            <span class="fw-bold text-dark">₹{{ '{:,}'.format(emi_amount) }} / mo</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="small fw-bold text-muted">Full Payment Plan</span>
+                                            <span class="fw-bold text-dark">One-Time</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                {% if outstanding > 0 %}
+                                <div class="mt-4 pt-3 border-top border-success border-opacity-25">
+                                    <h6 class="fw-bold text-success mb-3"><i class="fas fa-hand-holding-usd me-2"></i>Collect Fee Payment</h6>
+                                    
+                                    <form action="/admin/collect_fee/{{ enroll.id }}" method="POST" class="d-flex flex-column gap-2">
+                                        {% if enroll.payment_plan != 'Full Payment' %}
+                                        <button type="submit" name="payment_type" value="installment" class="btn btn-outline-success fw-bold w-100" onclick="return confirm('Confirm collection of next EMI installment?');">
+                                            Collect Next Installment (₹{{ '{:,}'.format(emi_amount) }})
+                                        </button>
+                                        {% endif %}
+                                        
+                                        <button type="submit" name="payment_type" value="full" class="btn btn-success fw-bold w-100" onclick="return confirm('Confirm collection of remaining balance (₹{{ '{:,}'.format(outstanding) }})?');">
+                                            Mark as Fully Paid (₹{{ '{:,}'.format(outstanding) }})
+                                        </button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <div class="mt-4 pt-3 border-top border-success border-opacity-25">
+                                    <div class="alert alert-success text-center fw-bold py-2 mb-0"><i class="fas fa-check-circle me-2"></i> 100% Fee Paid</div>
+                                </div>
+                                {% endif %}
+
+                                <a href="/download_slip/{{ enroll.id }}" class="btn btn-dark w-100 fw-bold mt-3 shadow-sm rounded-pill"><i class="fas fa-receipt me-2"></i>Download Updated Bill</a>
+
+                                {% if (session.get('admin_logged_in') or session.get('staff_logged_in')) and enroll.status == 'Pending' %}
+                                <div class="mt-4 pt-4 border-top border-primary border-opacity-25">
+                                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-calculator me-2"></i>Fee & Scholarship Calculator</h6>
+                                    
+                                    <form action="/admin/apply_discount/{{ enroll.id }}" method="POST">
+                                        
+                                        <label class="form-label small fw-bold text-muted text-uppercase mb-1">Scholarship Discount</label>
+                                        <select name="discount_pct" id="discountSelect" class="form-select border-primary bg-white mb-3" required>
+                                            <option value="0">No Additional Discount (0%)</option>
+                                            <option value="10">AKS-10 (10% OFF)</option>
+                                            <option value="20">AKS-20 (20% OFF)</option>
+                                            <option value="30">AKS-30 (30% OFF)</option>
+                                            <option value="40">AKS-40 (40% OFF)</option>
+                                            <option value="50">AKS-50 (50% OFF)</option>
+                                        </select>
+
+                                        <label class="form-label small fw-bold text-muted text-uppercase mb-1">Change Payment Plan</label>
+                                        <select name="new_payment_plan" id="planSelect" class="form-select border-primary bg-white mb-3">
+                                            <option value="full" {% if enroll.payment_plan == 'Full Payment' %}selected{% endif %}>Full Payment</option>
+                                            <option value="emi_3" {% if enroll.payment_plan == '3 Months EMI' %}selected{% endif %}>3 Months EMI</option>
+                                            <option value="emi_6" {% if enroll.payment_plan == '6 Months EMI' %}selected{% endif %}>6 Months EMI</option>
+                                        </select>
+                                        
+                                        <div id="previewDiscountBox" style="display:none;" class="p-3 bg-white border border-warning rounded-3 shadow-sm mb-3">
+                                            <h6 class="text-warning fw-bold mb-2" style="font-size: 0.85rem;"><i class="fas fa-eye me-1"></i> Live Calculation Preview</h6>
+                                            
+                                            <div class="d-flex justify-content-between small mb-1">
+                                                <span class="text-muted">Discount Amount:</span>
+                                                <span class="text-success fw-bold" id="previewDiscountAmt"></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between small pb-2 mb-2 border-bottom">
+                                                <span class="text-muted fw-bold">New Payable Fee:</span>
+                                                <span class="text-dark fw-bold fs-6" id="previewNewPayable"></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between small">
+                                                <span class="text-danger fw-bold">New Installment:</span>
+                                                <span class="text-danger fw-bold fs-6"><span id="previewEmiAmt"></span></span>
+                                            </div>
+                                            <div class="text-end small text-muted fst-italic" id="previewPlanText"></div>
+                                        </div>
+
+                                        {% if session.get('admin_logged_in') %}
+                                            <button type="submit" id="btnApplyScholarship" class="btn btn-primary w-100 fw-bold" style="display: none;" onclick="return confirm('Apply changes? This will permanently recalculate the fee and EMIs.');">
+                                                Update Fee & Plan
+                                            </button>
+                                            <small class="text-muted mt-2 d-block" style="font-size: 0.75rem;" id="adminHelperText">* Select a code or plan to preview changes. Click Update to save.</small>
+                                        {% else %}
+                                            <button type="button" id="btnApplyScholarship" class="btn btn-secondary w-100 fw-bold disabled" style="display: none;">
+                                                <i class="fas fa-lock me-2"></i> Admin Access Required to Save
+                                            </button>
+                                            <small class="text-danger mt-2 d-block fw-bold" style="font-size: 0.75rem;"><i class="fas fa-lock me-1"></i> You can use the calculator to preview fees, but only admins can save changes.</small>
+                                        {% endif %}
+                                        
+                                    </form>
+                                </div>
+                                {% endif %}
+                                </div>
+
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center flex-wrap gap-3 bg-light p-4 rounded-4 border">
+                        
+                        {% if enroll.status == 'Pending' %}
+                            
+                            {% if session.get('admin_logged_in') %}
+                                <a href="/admin/reject/{{ enroll.id }}" class="btn btn-outline-danger btn-lg rounded-pill px-5 fw-bold shadow-sm" onclick="return confirm('Are you sure you want to reject this admission?');">
+                                    <i class="fas fa-times me-2"></i> Reject Admission
+                                </a>
+                                <a href="/admin/confirm_approve/{{ enroll.id }}" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm" onclick="return confirm('Confirming payment and verifying Aadhar. Approve?');">
+                                    <i class="fas fa-check-circle me-2"></i> Approve & Verify
+                                </a>
+                            {% else %}
+                                <span class="text-muted fw-bold fst-italic"><i class="fas fa-lock me-2"></i>Awaiting Administrator Approval</span>
+                            {% endif %}
+                            
+                        {% else %}
+                            
+                            {% if session.get('admin_logged_in') %}
+                                {% if enroll.status != 'Completed' %}
+                                    <a href="/admin/complete/{{ enroll.id }}" class="btn btn-info text-white btn-lg rounded-pill px-4 fw-bold shadow-sm" onclick="return confirm('Mark this student as having officially completed the course?');">
+                                        <i class="fas fa-graduation-cap me-2"></i> Mark Course Completed
+                                    </a>
+                                {% endif %}
+                                <a href="/admin/delete_enrollment/{{ enroll.id }}" class="btn btn-outline-danger btn-lg rounded-pill px-4 fw-bold shadow-sm" onclick="return confirm('Permanently delete this student record? This cannot be undone.');">
+                                    <i class="fas fa-trash-alt me-2"></i> Delete Student
+                                </a>
+                            {% else %}
+                                <span class="text-success fw-bold"><i class="fas fa-check-circle me-2"></i>Student File Active</span>
+                            {% endif %}
+
+                        {% endif %}
+                    </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const discountSelect = document.getElementById('discountSelect');
+            const planSelect = document.getElementById('planSelect');
+            const previewBox = document.getElementById('previewDiscountBox');
+            const btnApply = document.getElementById('btnApplyScholarship');
+            const totalFee = parseInt("{{ enroll.total_fee }}");
+
+            function updatePreview() {
+                const pct = parseInt(discountSelect.value) || 0;
+                const plan = planSelect.value;
+                
+                // Calculate Math
+                const discountAmt = Math.floor(totalFee * (pct / 100));
+                const newPayable = totalFee - discountAmt;
+                
+                let emiAmt = newPayable;
+                let emiText = "Full Payment";
+                
+                if (plan === 'emi_3') {
+                    emiAmt = Math.ceil(newPayable / 3);
+                    emiText = "3 Months EMI Plan";
+                } else if (plan === 'emi_6') {
+                    emiAmt = Math.ceil(newPayable / 6);
+                    emiText = "6 Months EMI Plan";
+                }
+
+                // Update UI
+                document.getElementById('previewDiscountAmt').innerText = '- ₹' + discountAmt.toLocaleString('en-IN');
+                document.getElementById('previewNewPayable').innerText = '₹' + newPayable.toLocaleString('en-IN');
+                
+                if (plan === 'full') {
+                    document.getElementById('previewEmiAmt').innerText = '₹' + emiAmt.toLocaleString('en-IN') + ' (One-Time)';
+                } else {
+                    document.getElementById('previewEmiAmt').innerText = '₹' + emiAmt.toLocaleString('en-IN') + ' / month';
+                }
+                document.getElementById('previewPlanText').innerText = emiText;
+                
+                // Show Box and Button
+                previewBox.style.display = 'block';
+                btnApply.style.display = 'block';
+            }
+
+            if(discountSelect && planSelect) {
+                discountSelect.addEventListener('change', updatePreview);
+                planSelect.addEventListener('change', updatePreview);
+            }
+        });
+    </script>
+</body>
+</html>

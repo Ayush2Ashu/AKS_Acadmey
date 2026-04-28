@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Admission Slip | AKS Academy</title>
+    <style>
+        /* PDF Page Setup */
+        @page {
+            size: A4;
+            margin: 1cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0.5cm;
+                margin-left: 1cm;
+                margin-right: 1cm;
+                height: 1.5cm; /* Reduced footer height since signatures are removed from here */
+            }
+        }
+        
+        body { 
+            font-family: Helvetica, Arial, sans-serif; 
+            color: #222222; 
+            font-size: 11px; 
+            line-height: 1.3; 
+        }
+        
+        /* Header Section */
+        .header-table { 
+            width: 100%; 
+            border-bottom: 2px solid #003566; 
+            padding-bottom: 8px; 
+            margin-bottom: 12px; 
+        }
+        .logo-cell { width: 15%; text-align: left; vertical-align: middle; }
+        .title-cell { width: 65%; text-align: center; vertical-align: middle; }
+        .photo-cell { width: 20%; text-align: right; vertical-align: middle; }
+        
+        .title-cell h1 { color: #003566; font-size: 24px; font-weight: bold; margin: 0; letter-spacing: 1px; }
+        .title-cell p { margin: 2px 0 0 0; color: #555555; font-size: 10px; }
+
+        /* Document Title */
+        .doc-badge {
+            background-color: #003566;
+            color: #ffffff;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 6px;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+        
+        .section-badge {
+            background-color: #555555;
+            color: #ffffff;
+            text-align: left;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 8px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        /* Tables */
+        .data-table, .fee-table, .emi-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 12px; 
+        }
+        .data-table th, .data-table td, .fee-table th, .fee-table td, .emi-table th, .emi-table td { 
+            border: 1px solid #cccccc; 
+            padding: 4px 6px;
+        }
+        
+        .data-table th { background-color: #f4f7f6; color: #003566; font-weight: bold; width: 20%; text-align: left; }
+        .data-table td { width: 30%; }
+
+        .fee-table th { background-color: #003566; color: #ffffff; font-weight: bold; text-transform: uppercase; font-size: 10px; text-align: left; }
+        .amount-col { text-align: right; width: 130px; font-weight: bold; }
+        
+        .discount-row td { background-color: #e8f5e9; font-size: 11px; font-weight: bold; border-color: #198754; color: #198754; }
+        .total-row td { background-color: #e6f9ed; font-size: 12px; font-weight: bold; border-color: #003566; }
+        .balance-row td { background-color: #fff5f5; font-size: 12px; font-weight: bold; border-color: #dc3545; color: #dc3545; }
+
+        /* EMI Table Styling */
+        .emi-table th { background-color: #dc3545; color: white; font-weight: bold; text-align: center; font-size: 10px; text-transform: uppercase;}
+        .emi-table td { text-align: center; font-weight: bold; color: #333; }
+        .emi-title { color: #dc3545; font-size: 12px; font-weight: bold; margin-bottom: 4px; text-decoration: underline; text-transform: uppercase; }
+
+        /* Rules Box */
+        .rules-box {
+            background-color: #f8f9fc;
+            border-left: 3px solid #00d4ff;
+            padding: 6px 12px;
+            font-size: 9.5px;
+            color: #444444;
+            margin-bottom: 10px;
+        }
+        .rules-box h4 { margin-top: 0; color: #003566; margin-bottom: 4px; font-size: 10px;}
+        .rules-box ul { margin: 0; padding-left: 18px; }
+        .rules-box li { margin-bottom: 2px; }
+
+        /* Aadhar Page Styling */
+        .annexure-title { text-align: center; color: #003566; font-size: 18px; font-weight: bold; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .aadhar-image { max-width: 100%; max-height: 650px; border: 2px dashed #003566; display: block; margin: 0 auto; }
+        .pdf-vault-notice { text-align: center; padding: 40px; border: 2px dashed #198754; background-color: #f0fdf4; margin-top: 50px; }
+
+        /* Signature Box styles for page 2 */
+        .signature-box {
+            width: 100%; 
+            margin-top: 50px;
+        }
+        .signature-box td {
+            border: none;
+            text-align: center;
+            vertical-align: bottom;
+            height: 50px;
+        }
+        .sig-line {
+            border-top: 1px solid #000000; 
+            width: 70%; 
+            margin: 0 auto; 
+            padding-top: 4px; 
+            font-weight: bold; 
+            color: #333; 
+            font-size: 11px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td class="logo-cell">
+                <img src="static/images/aks_logo.jpeg" style="width: 70px; height: 70px;" alt="AKS Logo">
+            </td>
+            <td class="title-cell">
+                <h1>AKS ACADEMY</h1>
+                <p>Elite Coaching for JEE and NDA</p>
+                <p>Ranchi, Jharkhand, India | Ph: +91 94303 36006</p>
+                <p>Email: admissions@aksacademy.com</p>
+            </td>
+            <td class="photo-cell">
+                <img src="static/uploads/students/{{ enroll.student_image }}" style="width: 65px; height: 85px; border: 1px solid #000; object-fit: cover;" alt="Student Photo">
+            </td>
+        </tr>
+    </table>
+
+    <div class="doc-badge">
+        OFFICIAL ADMISSION & FEE RECEIPT
+    </div>
+
+    <table class="data-table">
+        <tr>
+            <th>Roll Number:</th>
+            <td style="font-weight: bold; color: #003566;">AKS-2026-{{ "%05d" | format(enroll.id) }}</td>
+            <th>Date of Admission:</th>
+            <td style="font-weight: bold;">{{ enroll.admission_date }}</td>
+        </tr>
+        <tr>
+            <th>Student Name:</th>
+            <td style="font-weight: bold; text-transform: uppercase;">{{ enroll.student }}</td>
+            <th>Course Enrolled:</th>
+            <td style="font-weight: bold; color: #003566;">{{ enroll.course }}</td>
+        </tr>
+        <tr>
+            <th>Email Address:</th>
+            <td>{{ enroll.student_email }}</td>
+            <th>Academic Session:</th>
+            <td style="font-weight: bold;">{{ enroll.session_year }}</td>
+        </tr>
+        <tr>
+            <th>Father's Name:</th>
+            <td>{{ enroll.father_name }}</td>
+            <th>Student Mobile:</th>
+            <td>{{ enroll.student_phone }}</td>
+        </tr>
+        <tr>
+            <th>Status:</th>
+            {% if enroll.status == 'Approved' %}
+                <td style="color: #198754; font-weight: bold;">PAID & VERIFIED</td>
+            {% else %}
+                <td style="color: #d97706; font-weight: bold;">PENDING VERIFICATION</td>
+            {% endif %}
+            <th>Parent Mobile:</th>
+            <td style="font-weight: bold;">{{ enroll.parent_phone }}</td>
+        </tr>
+        <tr>
+            <th>Permanent Address:</th>
+            <td colspan="3">{{ enroll.permanent_address }}, Pincode: <span style="font-weight: bold;">{{ enroll.pincode }}</span></td>
+        </tr>
+    </table>
+
+    <div class="section-badge">ACADEMIC INFORMATION</div>
+    <table class="data-table">
+        {% if enroll.current_board and enroll.current_board != 'N/A' %}
+        <tr>
+            <th>Current Board:</th>
+            <td>{{ enroll.current_board }}</td>
+            <th>Current School:</th>
+            <td>{{ enroll.current_school }}</td>
+        </tr>
+        <tr>
+            <th>Integrated JEE/NEET:</th>
+            <td>{{ enroll.add_jee_neet }}</td>
+            <th>Core Subjects:</th>
+            <td>{{ enroll.subjects }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <th>Previous Board:</th>
+            <td>{{ enroll.prev_board }}</td>
+            <th>Previous School:</th>
+            <td>{{ enroll.prev_school }}</td>
+        </tr>
+        <tr>
+            <th>Passing Year:</th>
+            <td>{{ enroll.prev_year }}</td>
+            <th>Marks Obtained:</th>
+            <td>{{ enroll.prev_marks }}</td>
+        </tr>
+        <tr>
+            <th>Percentage:</th>
+            <td>{{ enroll.prev_percentage }}%</td>
+            <th>Division / Rank:</th>
+            <td>{{ enroll.prev_division }}</td>
+        </tr>
+    </table>
+
+    <div class="section-badge" style="background-color: #003566;">FINANCIAL SUMMARY</div>
+    <table class="fee-table">
+        <thead>
+            <tr>
+                <th>Description / Course Details</th>
+                <th class="amount-col">Amount (INR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <strong style="font-size: 11px;">Base Course Fee</strong><br>
+                    <span style="color: #555;">Enrolled Course: {{ enroll.course }} ({{ enroll.session_year }})</span>
+                </td>
+                <td class="amount-col">Rs. {{ '{:,}'.format(enroll.total_fee) }}</td>
+            </tr>
+            
+            {% if enroll.discount_applied != "None" %}
+            <tr class="discount-row">
+                <td style="text-align: right;">Scholarship / Discount Applied:</td>
+                <td class="amount-col">- {{ enroll.discount_applied }}</td>
+            </tr>
+            {% endif %}
+
+            <tr style="background-color: #f8f9fa;">
+                <td style="text-align: right; font-weight: bold; color: #003566;">Net Payable Course Fee:</td>
+                <td class="amount-col" style="font-size: 12px; color: #003566;">Rs. {{ '{:,}'.format(enroll.payable_fee) }}</td>
+            </tr>
+
+            <tr class="total-row">
+                <td style="text-align: right;">Total Amount Received to Date:</td>
+                <td class="amount-col">Rs. {{ '{:,}'.format(enroll.amount_paid) }}</td>
+            </tr>
+
+            {% set remaining = enroll.payable_fee - enroll.amount_paid %}
+            {% if remaining > 0 %}
+            <tr class="balance-row">
+                <td style="text-align: right;">Remaining Balance Due:</td>
+                <td class="amount-col">Rs. {{ '{:,}'.format(remaining) }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    {% if 'EMI' in enroll.payment_plan and remaining > 0 %}
+        <div class="emi-title">UPCOMING EMI SCHEDULE</div>
+        <table class="emi-table">
+            <thead>
+                <tr>
+                    <th>Installment Phase</th>
+                    <th>Payment Due Date</th>
+                    <th>Amount Due (INR)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if '3 Month' in enroll.payment_plan %}
+                    {% set total_emis = 3 %}
+                    {% set fixed_emi = (enroll.payable_fee / 3) | round | int %}
+                {% elif '6 Month' in enroll.payment_plan %}
+                    {% set total_emis = 6 %}
+                    {% set fixed_emi = (enroll.payable_fee / 6) | round | int %}
+                {% else %}
+                    {% set total_emis = 1 %}
+                    {% set fixed_emi = remaining %}
+                {% endif %}
+
+                {% set emis_paid = (enroll.amount_paid / fixed_emi) | round | int %}
+                {% set emis_left = total_emis - emis_paid %}
+
+                {% if emis_left > 0 %}
+                    <tr>
+                        <td>Next Installment</td>
+                        <td>5th of Next Month</td>
+                        <td>Rs. {{ '{:,}'.format(fixed_emi if remaining > fixed_emi else remaining) }}</td>
+                        <td style="color: #dc3545;">Pending</td>
+                    </tr>
+                {% endif %}
+                
+                {% if emis_left > 1 %}
+                    <tr>
+                        <td>Remaining Installments</td>
+                        <td>5th of Every Subsequent Month (x{{ emis_left - 1 }})</td>
+                        <td>Rs. {{ '{:,}'.format(fixed_emi) }} each</td>
+                        <td style="color: #dc3545;">Pending</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <div id="footerContent">
+        <div style="text-align: center; font-size: 9px; color: #888888; border-top: 1px solid #eeeeee; padding-top: 5px;">
+            AKS Academy Management System &copy; 2026 | Generated securely from the student portal.
+        </div>
+    </div>
+
+    <pdf:nextpage />
+
+    <div class="annexure-title">
+        Annexure I: Attached KYC Document (Aadhar Proof)
+    </div>
+
+    {% if enroll.aadhar_card and enroll.aadhar_card.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif')) %}
+        <div style="text-align: center;">
+            <img src="static/uploads/students/{{ enroll.aadhar_card }}" class="aadhar-image" alt="Aadhar Card">
+            <p style="margin-top: 10px; color: #666; font-size: 10px;">Document Reference: {{ enroll.aadhar_card }}</p>
+        </div>
+    {% else %}
+        <div class="pdf-vault-notice">
+            <h2 style="color: #198754; margin-top: 0;">✔ Aadhar Verification Successful</h2>
+            <p style="font-size: 14px; color: #333;">The student uploaded their Aadhar Card in <strong>PDF format</strong>.</p>
+            <p style="font-size: 12px; color: #555;">To maintain data security, the PDF document is stored safely in the AKS Academy Secure Digital Vault and is not printed directly in this receipt.</p>
+            <p style="margin-top: 20px; font-weight: bold; color: #003566;">File Reference: {{ enroll.aadhar_card }}</p>
+        </div>
+    {% endif %}
+
+    <div class="rules-box" style="margin-top: 30px;">
+        <h4>Terms & Conditions of Enrollment:</h4>
+        <ul>
+            <li>This is a computer-generated receipt confirming your admission and fee payment to AKS Academy.</li>
+            <li><strong>Refund Policy:</strong> Fees once paid are strictly non-refundable and non-transferable under any circumstances.</li>
+            <li><strong>Digital Access:</strong> This receipt grants the student access to the LMS Dashboard, live lectures, and recorded materials.</li>
+            <li><strong>EMI Default:</strong> Failure to pay upcoming installments by the 5th of the month will result in immediate suspension of LMS and classroom access.</li>
+        </ul>
+    </div>
+
+    <table class="signature-box">
+        <tr>
+            <td>
+                <div class="sig-line">Student / Parent Signature</div>
+            </td>
+            <td>
+                <div class="sig-line">Authorized Signatory (Admin)</div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

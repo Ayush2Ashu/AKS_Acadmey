@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for AKS-SAT | AKS Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        .navbar { background: rgba(13, 27, 42, 0.95) !important; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .navbar-brand { font-weight: 800; letter-spacing: 1.5px; color: #00d4ff !important; text-transform: uppercase; }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #001d3d 0%, #00509e 100%);
+            color: white;
+            padding: 60px 0;
+            border-bottom: 4px solid #ffc107;
+        }
+
+        .sat-form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin-top: -40px;
+            border-top: 5px solid #ffc107;
+        }
+
+        .form-control, .form-select { 
+            border-radius: 10px; 
+            padding: 14px 18px; 
+            border: 1px solid #dee2e6; 
+            background-color: #f8f9fa;
+            font-size: 0.95rem;
+        }
+        .form-control:focus, .form-select:focus { 
+            border-color: #ffc107; 
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2); 
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/static/images/aks_logo.jpeg" alt="AKS Academy Logo" width="40" height="40" class="me-2 rounded-circle bg-white p-1">
+                 AKS ACADEMY
+            </a>
+            <div class="ms-auto">
+                <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-4 fw-bold"><i class="fas fa-home me-2"></i>Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-section text-center">
+        <div class="container">
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3"><i class="fas fa-star me-1"></i> SCHOLARSHIP EXAM 2026</span>
+            <h1 class="display-4 fw-bold mb-3">AKS-SAT Application</h1>
+            <p class="lead opacity-75 mx-auto" style="max-width: 700px;">Register now to take the AKS Scholarship & Admission Test. Top scorers unlock up to <strong>50% off</strong> their total course fees!</p>
+        </div>
+    </div>
+
+    <div class="container flex-grow-1 pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                <div class="sat-form-card">
+                    <h4 class="fw-bold text-dark mb-4 text-center">Fill out the registration form below</h4>
+                    
+                    <form action="/submit_sat" method="POST">
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Full Legal Name</label>
+                            <input type="text" class="form-control" name="sat_name" placeholder="E.g. Rahul Sharma" required>
+                        </div>
+                        
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Email Address</label>
+                                <input type="email" class="form-control" name="sat_email" placeholder="name@example.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Mobile Number</label>
+                                <input type="tel" class="form-control" name="sat_phone" placeholder="10-digit number" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Target Batch / Course</label>
+                            <select class="form-select fw-bold text-dark" name="sat_batch" required>
+                                <option value="">-- Select the course you want to join --</option>
+                                {% for course in courses %}
+                                    <option value="{{ course.name }}">{{ course.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="alert alert-info bg-primary bg-opacity-10 border-0 rounded-3 small p-3 mb-4">
+                            <i class="fas fa-info-circle me-2 text-primary"></i> <strong>Syllabus:</strong> The test will cover Basic Aptitude, Physics, Chemistry, Biology & Mathematics based on your current standard.
+                        </div>
+
+                        <button type="submit" class="btn btn-warning w-100 py-3 rounded-pill fw-bold fs-5 shadow-sm text-dark">
+                            Submit Application <i class="fas fa-paper-plane ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

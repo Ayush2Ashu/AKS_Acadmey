@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.name }} | AKS Academy</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; color: #2b3440; overflow-x: hidden; }
+
+        /* Navbar */
+        .navbar { background: rgba(13, 27, 42, 0.95) !important; backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);}
+        .navbar-brand { font-weight: 800; letter-spacing: 1.5px; color: #00d4ff !important; }
+        .nav-link { color: #fff !important; transition: 0.3s; }
+        .nav-link:hover { color: #00d4ff !important; }
+
+        /* Hero Banner */
+        .course-hero {
+            background: linear-gradient(135deg, rgba(0,29,61,0.9) 0%, rgba(13,27,42,0.95) 100%), url('{{ course.img }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 100px 0;
+            color: white;
+            border-bottom: 5px solid #00d4ff;
+        }
+        
+        .course-badge {
+            background: #ffc107; color: #000; padding: 6px 16px; border-radius: 30px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* Teacher Cards */
+        .teacher-card {
+            background: white; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #eaedf1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: 0.3s;
+        }
+        .teacher-card:hover { transform: translateY(-5px); border-color: #00d4ff; box-shadow: 0 10px 25px rgba(0,212,255,0.1); }
+        .teacher-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #001d3d; }
+
+        /* Enquiry Panel */
+        .enrollment-panel {
+            background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: sticky; top: 100px; border-top: 5px solid #00d4ff;
+        }
+        
+        /* PREMIUM FORM STYLING */
+        .form-section {
+            background: #ffffff;
+            border: 1px solid #eaedf1;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .form-section-title {
+            color: #001d3d;
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #f4f7f6;
+            padding-bottom: 15px;
+        }
+        .form-section-title i {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-right: 12px;
+        }
+        .form-control, .form-select { 
+            border-radius: 10px; 
+            padding: 14px 18px; 
+            border: 1px solid #d1d5db; 
+            background-color: #fcfcfc;
+            color: #2b3440;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .form-control:focus, .form-select:focus { 
+            border-color: #00509e; 
+            box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.1); 
+            background-color: #ffffff;
+        }
+        .form-label { 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            color: #6b7280; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .declaration-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #00509e;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        /* Payment Radio Button Styling */
+        .payment-option-card {
+            border: 2px solid #eaedf1;
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fff;
+            height: 100%;
+        }
+        .payment-option-card:hover {
+            border-color: #00d4ff;
+            background: #f8fbff;
+        }
+        .payment-radio:checked + .payment-option-card {
+            border-color: #00509e;
+            background: rgba(0, 80, 158, 0.05);
+            box-shadow: 0 0 0 2px rgba(0, 80, 158, 0.2);
+        }
+        .payment-radio { display: none; }
+        
+        footer { background: #0d1b2a; color: #e0e1dd; padding: 60px 0 30px; border-top: 4px solid #00d4ff; }
+        .footer-link { color: #adb5bd; text-decoration: none; transition: 0.3s; display: block; margin-bottom: 10px; font-size: 0.9rem;}
+        .footer-link:hover { color: #00d4ff; padding-left: 5px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/static/images/aks_logo.jpeg" alt="AKS Academy Logo" width="45" height="45" class="me-2 rounded-circle bg-white p-1">
+                 AKS ACADEMY
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto text-center align-items-lg-center">
+                    {% if session.get('user') %}
+                        <li class="nav-item">
+                            <a class="nav-link px-3 fw-bold" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">
+                                <i class="fas fa-user-circle me-1 fs-5 align-middle"></i> My Profile
+                            </a>
+                        </li>
+                        <li class="nav-item"><a class="btn btn-outline-info ms-lg-3 px-4 fw-bold" href="/dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="btn btn-danger ms-lg-2 px-3 rounded-pill shadow-sm" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    {% elif session.get('admin_logged_in') %}
+                        <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 active fw-bold text-info" href="/courses">Courses</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/about">About Us</a></li>
+                        <li class="nav-item"><a class="btn btn-warning rounded-pill ms-lg-3 px-4 fw-bold text-dark shadow-sm my-2 my-lg-0" href="/admin">Admin Panel</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 active fw-bold text-info" href="/courses">Courses</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/about">About Us</a></li>
+                        <li class="nav-item"><a class="btn btn-warning rounded-pill ms-lg-3 px-4 fw-bold text-dark shadow-sm my-2 my-lg-0" href="/login">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="course-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="course-badge mb-3 d-inline-block">{{ course.tag }}</span>
+                    <h1 class="display-4 fw-bold mb-3">{{ course.name }}</h1>
+                    <p class="lead opacity-75 mb-4">{{ course.desc }}</p>
+                    <div class="d-flex gap-4 align-items-center flex-wrap mb-5">
+                        <div class="d-flex align-items-center"><i class="far fa-clock fa-2x text-info me-3"></i><div><small class="d-block opacity-75 text-uppercase fw-bold">Duration</small><strong class="fs-5">{{ course.duration }}</strong></div></div>
+                        <div class="d-flex align-items-center"><i class="fas fa-tags fa-2x text-info me-3"></i><div><small class="d-block opacity-75 text-uppercase fw-bold">Base Fee</small><strong class="fs-5">₹{{ course.price }}</strong></div></div>
+                    </div>
+                    
+                    <div>
+                        {% if session.get('user') %}
+                            <button data-bs-toggle="modal" data-bs-target="#admissionModal" class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold text-dark shadow-lg border-2 border-warning text-uppercase letter-spacing-1">
+                                Proceed to Admission <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        {% else %}
+                            <a href="/login" class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold text-dark shadow-lg border-2 border-warning text-uppercase letter-spacing-1">
+                                Login to Enroll <i class="fas fa-lock ms-2"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5 py-4">
+        <div class="row g-5">
+            <div class="col-lg-7">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} rounded-3 shadow-sm mb-4"><i class="fas fa-info-circle me-2"></i>{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <h3 class="fw-bold mb-4" style="color: #001d3d;">Course Highlights</h3>
+                <div class="p-4 bg-white rounded-4 shadow-sm border border-light mb-5">
+                    <ul class="list-unstyled mb-0 fs-5 text-muted">
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-3"></i> <strong>Dual Board Compatibility:</strong> Curriculum perfectly mapped for both <strong>CBSE</strong> and <strong>ICSE</strong>.</li>
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-3"></i> <strong>Live Interactive Learning:</strong> Experience dynamic, real-time problem-solving sessions.</li>
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-3"></i> <strong>Premium Study Materials:</strong> Access to our exclusive question banks and mock tests.</li>
+                        <li><i class="fas fa-check-circle text-success me-3"></i> <strong>Constant Evaluation:</strong> Weekly exams to track progress and identify weak points.</li>
+                    </ul>
+                </div>
+
+                <h3 class="fw-bold mb-4" style="color: #001d3d;">Faculty Directors</h3>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="teacher-card">
+                            <img src="/static/images/Profile.jpeg" class="teacher-img" alt="Ajeet Kumar">
+                            <h5 class="fw-bold text-dark mb-1">Mr. Ajeet Kumar</h5>
+                            <p class="small text-muted mb-0">Master Faculty & Founder</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="teacher-card">
+                            <img src="/static/images/Mukesh_sir.jpeg" class="teacher-img" alt="Expert Teacher">
+                            <h5 class="fw-bold text-dark mb-1">Mr. Mukesh Kumar</h5>
+                            <p class="small text-muted mb-0">Physics Expert</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="teacher-card">
+                            <img src="/static/images/saurav_sir.jpeg" class="teacher-img" alt="Expert Teacher">
+                            <h5 class="fw-bold text-dark mb-1">Mr. Saurabh Kumar</h5>
+                            <p class="small text-muted mb-0">Chemistry Expert</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="enrollment-panel">
+                    <div class="text-center mb-4">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-headset fa-2x text-info"></i>
+                        </div>
+                        <h4 class="fw-bold">Request a Callback</h4>
+                        <p class="text-muted small">Have doubts? Drop your details and our academic counselor will contact you within 24 hours.</p>
+                    </div>
+
+                    <form action="/submit_enquiry" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Course of Interest</label>
+                            <input type="text" class="form-control text-muted" name="course_interest" style="background-color: #eaedf1;" value="{{ course.name }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" name="enquiry_name" placeholder="E.g. Rahul Sharma" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="tel" class="form-control" name="enquiry_phone" placeholder="10-digit mobile number" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" name="enquiry_email" placeholder="name@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-100 py-3 rounded-pill fw-bold text-uppercase fs-6 shadow-sm">
+                            Submit Request <i class="fas fa-paper-plane ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="row g-4 text-md-start text-center">
+                <div class="col-md-4">
+                    <h4 class="text-white fw-bold mb-3">AKS ACADEMY</h4>
+                    <p class="small opacity-75 pe-md-4">Elite coaching for JEE, NDA, and Board Exams. Building the foundation for future leaders in Jharkhand.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="text-white fw-bold mb-4">Quick Links</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <a href="/" class="footer-link">Home</a>
+                            <a href="/courses" class="footer-link">Courses</a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/about" class="footer-link">About Us</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 border border-secondary rounded-4 bg-dark bg-opacity-50">
+                        <h5 class="text-white fw-bold mb-2">Chat with Us</h5>
+                        <p class="small opacity-75 mb-3">Get an instant reply on WhatsApp.</p>
+                        <a href="https://wa.me/919430336006" class="btn btn-success rounded-3 px-4 fw-bold shadow-sm" target="_blank" style="background-color: #25d366; border: none;">
+                            <i class="fab fa-whatsapp me-2"></i> Message Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-5 opacity-10">
+            <p class="text-center small opacity-50 mb-0">© 2026 AKS Academy | Designed for Excellence by Ajeet Kumar</p>
+        </div>
+    </footer>
+
+    {% if session.get('user') %}
+    
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #001d3d 0%, #003566 100%); height: 130px; position: relative;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center px-4 pb-5 position-relative">
+                    <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow" style="width: 110px; height: 110px; margin-top: -65px; border: 5px solid white;">
+                        <i class="fas fa-user-graduate text-primary" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3 mb-0 text-dark">{{ session.get('user') }}</h3>
+                    <span class="badge bg-info text-dark rounded-pill px-3 py-1 mt-2 mb-4 fw-bold">AKS Academy Student</span>
+                    <div class="bg-light rounded-4 p-4 text-start shadow-sm border border-white">
+                        <p class="mb-3 text-muted small fw-bold text-uppercase letter-spacing-1">Account Summary</p>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white p-2 rounded-circle shadow-sm me-3 text-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-shield-alt text-success mt-1"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">Account Status</h6>
+                                <small class="text-muted">Verified & Secure</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="admissionModal" tabindex="-1" aria-labelledby="admissionModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; background-color: #f4f7f6;">
+                
+                <div class="modal-header border-0 py-4 px-4 px-md-5" style="background: linear-gradient(135deg, #001d3d 0%, #003566 100%); color: white;">
+                    <div>
+                        <h3 class="modal-title fw-bold mb-1" id="admissionModalLabel">Official Enrollment Portal</h3>
+                        <p class="mb-0 text-info fw-bold small text-uppercase letter-spacing-1">Application for {{ course.name }}</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body p-4 p-md-5">
+                    
+                    <form id="admissionForm" action="/checkout" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="course_name" value="{{ course.name }}">
+                        <input type="hidden" name="price" id="hiddenPriceInput" value="{{ course.price }}">
+                        <input type="hidden" name="payment_plan" id="hiddenPaymentPlan" value="full">
+
+                        <div id="formSection">
+                            <div class="d-flex align-items-center bg-white p-3 rounded-4 shadow-sm mb-4 border border-light">
+                                <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                                    <i class="fas fa-lock text-success fs-5"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0 text-muted small">Applicant ID: <strong class="text-dark">{{ session.get('user') }}</strong></p>
+                                    <p class="mb-0 text-success small fw-bold">Secure connection established.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h4 class="form-section-title"><i class="fas fa-id-card-clip"></i> Step 1: Identity & Verification</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Passport Size Photograph *</label>
+                                        <input type="file" class="form-control" name="student_image" accept="image/*" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Aadhar Card (Front & Back) *</label>
+                                        <input type="file" class="form-control" name="aadhar_card" accept="image/*,.pdf" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h4 class="form-section-title"><i class="fas fa-user-edit"></i> Step 2: Personal Information</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Full Name of Applicant *</label>
+                                        <input type="text" class="form-control" name="student_name" value="{{ session.get('user', '') }}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Academic Session *</label>
+                                        
+                                        {% if 'Foundation' in course.name or 'Pre-Foundation' in course.name %}
+                                            {% if '2 Years' in course.duration or '9 & 10' in course.name or '11 & 12' in course.name %}
+                                                <input type="text" class="form-control text-muted fw-bold" name="session_year" value="2026-2028" style="background-color: #eaedf1; pointer-events: none;" readonly>
+                                            {% else %}
+                                                <input type="text" class="form-control text-muted fw-bold" name="session_year" value="2026-2027" style="background-color: #eaedf1; pointer-events: none;" readonly>
+                                            {% endif %}
+                                        {% else %}
+                                            <select class="form-select" name="session_year" required>
+                                                <option value="2026-2027">2026-2027</option>
+                                                <option value="2027-2028">2027-2028</option>
+                                            </select>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if 'Foundation' in course.name and 'Pre-Foundation' not in course.name %}
+                                    <div class="col-12 mt-3 mb-2">
+                                        <label class="form-label text-primary" style="font-size: 0.85rem;"><i class="fas fa-book me-1"></i>Select Core Subjects *</label>
+                                        <div class="d-flex flex-wrap gap-4 bg-light p-3 rounded-3 border" style="border-color: #d1d5db !important;">
+                                            <div class="form-check d-flex align-items-center">
+                                                <input class="form-check-input flex-shrink-0 mt-0" type="checkbox" name="subjects" value="Math" id="sub_math" style="width: 1.3rem; height: 1.3rem; border: 2px solid #00509e; cursor: pointer;">
+                                                <label class="form-check-label text-dark fw-bold ms-2 pt-1" for="sub_math">1. Mathematics</label>
+                                            </div>
+                                            <div class="form-check d-flex align-items-center">
+                                                <input class="form-check-input flex-shrink-0 mt-0" type="checkbox" name="subjects" value="Biology" id="sub_bio" style="width: 1.3rem; height: 1.3rem; border: 2px solid #00509e; cursor: pointer;">
+                                                <label class="form-check-label text-dark fw-bold ms-2 pt-1" for="sub_bio">2. Biology</label>
+                                            </div>
+                                            <div class="form-check d-flex align-items-center">
+                                                <input class="form-check-input flex-shrink-0 mt-0" type="checkbox" name="subjects" value="Physics" id="sub_phy" style="width: 1.3rem; height: 1.3rem; border: 2px solid #00509e; cursor: pointer;">
+                                                <label class="form-check-label text-dark fw-bold ms-2 pt-1" for="sub_phy">3. Physics</label>
+                                            </div>
+                                            <div class="form-check d-flex align-items-center">
+                                                <input class="form-check-input flex-shrink-0 mt-0" type="checkbox" name="subjects" value="Chemistry" id="sub_chem" style="width: 1.3rem; height: 1.3rem; border: 2px solid #00509e; cursor: pointer;">
+                                                <label class="form-check-label text-dark fw-bold ms-2 pt-1" for="sub_chem">4. Chemistry</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Applicant Email Address *</label>
+                                        <input type="email" class="form-control" name="student_email" placeholder="student@example.com" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Date of Birth *</label>
+                                        <input type="date" class="form-control" name="dob" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Gender *</label>
+                                        <select class="form-select" name="gender" required>
+                                            <option value="">Select</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Applicant Mobile Number *</label>
+                                        <input type="tel" class="form-control" name="student_phone" placeholder="+91" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Parent / Guardian Mobile *</label>
+                                        <input type="tel" class="form-control" name="parent_phone" placeholder="+91" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Father's Full Name *</label>
+                                        <input type="text" class="form-control" name="father_name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Mother's Full Name *</label>
+                                        <input type="text" class="form-control" name="mother_name" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label class="form-label">Permanent Address *</label>
+                                        <textarea class="form-control" name="permanent_address" rows="2" placeholder="House No, Street, Landmark" required></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Local Address (If different)</label>
+                                        <textarea class="form-control" name="local_address" rows="2" placeholder="Current staying address in Ranchi"></textarea>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Pincode *</label>
+                                        <input type="text" class="form-control" name="pincode" placeholder="e.g. 834001" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">How did you hear about us? *</label>
+                                        <select class="form-select" name="source" required>
+                                            <option value="">Select Source</option>
+                                            <option value="Word of Mouth">Friends / Family</option>
+                                            <option value="Social Media">Social Media</option>
+                                            <option value="Google">Google Search</option>
+                                            <option value="Flyer/Banner">Poster / Banner</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if 'Foundation' in course.name or 'Pre-Foundation' in course.name %}
+                            <div class="form-section bg-light border-info border-opacity-25">
+                                <h4 class="form-section-title text-info"><i class="fas fa-school bg-white text-info shadow-sm"></i> Current School Details</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Current Education Board *</label>
+                                        <select class="form-select" name="current_board" id="currentBoardSelect" required>
+                                            <option value="CBSE">CBSE</option>
+                                            <option value="ICSE">ICSE</option>
+                                            <option value="State Board">State Board</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Current School Name *</label>
+                                        <input type="text" class="form-control" name="current_school" placeholder="E.g. DPS Ranchi" required>
+                                    </div>
+                                    <div class="col-12 mt-4">
+                                        <div class="form-check d-flex align-items-center bg-white p-3 rounded-3 shadow-sm border border-light">
+                                            <input class="form-check-input me-3 flex-shrink-0 mt-0" type="checkbox" id="add_jee_neet" name="add_jee_neet" value="yes" style="width: 1.5rem; height: 1.5rem; border: 2px solid #00509e; cursor: pointer;">
+                                            <label class="form-check-label fw-bold text-dark mb-0 pt-1" for="add_jee_neet" style="cursor: pointer; font-size: 0.95rem;">
+                                                <i class="fas fa-plus-circle text-success me-1"></i> Add Integrated JEE / NEET Preparation Module
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="form-section">
+                                <h4 class="form-section-title"><i class="fas fa-graduation-cap"></i> Step 3: Previous Academic Record</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Education Board *</label>
+                                        <select class="form-select" name="prev_board" required>
+                                            <option value="">Choose Board</option>
+                                            <option value="CBSE">CBSE</option>
+                                            <option value="ICSE">ICSE</option>
+                                            <option value="State Board">State Board</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Name of Last School / College *</label>
+                                        <input type="text" class="form-control" name="prev_school" required>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label class="form-label">Year of Passing *</label>
+                                        <input type="number" class="form-control" name="prev_year" placeholder="e.g. 2025" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Total Max Marks *</label>
+                                        <input type="number" class="form-control" name="prev_max_marks" placeholder="e.g. 500" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Total Marks Obtained *</label>
+                                        <input type="number" class="form-control" name="prev_obtained_marks" placeholder="e.g. 450" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Overall Percentage (%) *</label>
+                                        <input type="number" step="0.01" class="form-control" name="prev_percentage" placeholder="e.g. 90.00" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Rank / Division *</label>
+                                        <input type="text" class="form-control" name="prev_division" placeholder="e.g. 1st Division" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="declaration-box mb-4">
+                                <div class="form-check d-flex align-items-start">
+                                    <input class="form-check-input me-3 flex-shrink-0" type="checkbox" id="declaration" name="declaration" required style="width: 1.8rem; height: 1.8rem; border: 2px solid #00509e; cursor: pointer; margin-top: 0.1rem;">
+                                    <label class="form-check-label text-dark pt-1" for="declaration" style="cursor: pointer; font-size: 0.95rem; line-height: 1.5;">
+                                        <strong>Declaration of Authenticity:</strong> I hereby declare that all the information and documents provided in this application are true and correct to the best of my knowledge. I understand that any false information or disciplinary misconduct may lead to the immediate cancellation of my admission at AKS Academy without any fee refund.
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border border-light">
+                                <div class="mb-3 mb-md-0 text-center text-md-start">
+                                    <span class="d-block text-muted small fw-bold text-uppercase">Total Course Fee</span>
+                                    <span class="fs-2 fw-bold text-primary" id="dynamicPriceDisplay">₹{{ course.price }}</span>
+                                </div>
+                                <button type="button" id="btnPreviewForm" class="btn btn-primary px-5 py-3 rounded-pill fw-bold text-uppercase shadow-sm" style="background-color: #003566; border: none; font-size: 1.1rem; letter-spacing: 1px;">
+                                    Review Application <i class="fas fa-file-invoice ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="previewSection" style="display: none;">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="fw-bold text-dark mb-0"><i class="fas fa-search-dollar text-primary me-2"></i>Application Summary</h3>
+                                <button type="button" id="btnEditForm" class="btn btn-outline-secondary rounded-pill fw-bold px-4"><i class="fas fa-edit me-1"></i> Edit Details</button>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6 text-center bg-white p-4 rounded-4 shadow-sm border border-light">
+                                    <p class="text-muted small fw-bold text-uppercase letter-spacing-1 mb-3">Passport Photo</p>
+                                    <img id="previewPhoto" src="https://via.placeholder.com/150" alt="Passport Photo" class="img-fluid rounded-circle object-fit-cover shadow-sm" style="width: 140px; height: 140px; border: 4px solid #f8f9fa;">
+                                </div>
+                                <div class="col-md-6 text-center bg-white p-4 rounded-4 shadow-sm border border-light">
+                                    <p class="text-muted small fw-bold text-uppercase letter-spacing-1 mb-3">Aadhar Card</p>
+                                    <img id="previewAadhar" src="https://via.placeholder.com/300x150" alt="Aadhar Card" class="img-fluid rounded-3 object-fit-cover shadow-sm" style="width: 250px; height: 140px; border: 4px solid #f8f9fa;">
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-4 shadow-sm border border-light mb-4">
+                                
+                                <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary"><i class="fas fa-user-circle me-2"></i>Personal Details</h5>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4"><small class="text-muted text-uppercase fw-bold">Student Name</small><p class="fw-bold text-dark mb-0" id="pv_name">-</p></div>
+                                    <div class="col-md-4"><small class="text-muted text-uppercase fw-bold">Course Selected</small><p class="fw-bold text-info mb-0">{{ course.name }}</p></div>
+                                    <div class="col-md-4"><small class="text-muted text-uppercase fw-bold">Academic Session</small><p class="fw-bold text-dark mb-0" id="pv_session">-</p></div>
+                                    
+                                    <div class="col-md-4 mt-3"><small class="text-muted text-uppercase fw-bold">Email</small><p class="fw-bold text-dark mb-0" id="pv_email">-</p></div>
+                                    <div class="col-md-4 mt-3"><small class="text-muted text-uppercase fw-bold">Mobile</small><p class="fw-bold text-dark mb-0" id="pv_phone">-</p></div>
+                                    <div class="col-md-4 mt-3"><small class="text-muted text-uppercase fw-bold">Parent Mobile</small><p class="fw-bold text-dark mb-0" id="pv_parent_phone">-</p></div>
+                                    
+                                    <div class="col-md-4 mt-3"><small class="text-muted text-uppercase fw-bold">DOB</small><p class="fw-bold text-dark mb-0" id="pv_dob">-</p></div>
+                                    <div class="col-md-4 mt-3"><small class="text-muted text-uppercase fw-bold">Gender</small><p class="fw-bold text-dark mb-0" id="pv_gender">-</p></div>
+                                    <div class="col-md-4 mt-3"><small class="text-muted text-uppercase fw-bold">Source</small><p class="fw-bold text-dark mb-0" id="pv_source">-</p></div>
+
+                                    <div class="col-md-6 mt-3"><small class="text-muted text-uppercase fw-bold">Father's Name</small><p class="fw-bold text-dark mb-0" id="pv_father">-</p></div>
+                                    <div class="col-md-6 mt-3"><small class="text-muted text-uppercase fw-bold">Mother's Name</small><p class="fw-bold text-dark mb-0" id="pv_mother">-</p></div>
+                                </div>
+
+                                <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary"><i class="fas fa-home me-2"></i>Contact & Address</h5>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6"><small class="text-muted text-uppercase fw-bold">Permanent Address</small><p class="fw-bold text-dark mb-0" id="pv_perm_addr">-</p></div>
+                                    <div class="col-md-6"><small class="text-muted text-uppercase fw-bold">Local Address</small><p class="fw-bold text-dark mb-0" id="pv_local_addr">-</p></div>
+                                    <div class="col-md-12 mt-3"><small class="text-muted text-uppercase fw-bold">Pincode</small><p class="fw-bold text-dark mb-0" id="pv_pincode">-</p></div>
+                                </div>
+
+                                <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary"><i class="fas fa-graduation-cap me-2"></i>Academic Information</h5>
+                                <div class="row g-3">
+                                    <div class="col-12 row g-3" id="pv_curr_block" style="display: none;">
+                                        <div class="col-md-4"><small class="text-muted text-uppercase fw-bold">Current Board</small><p class="fw-bold text-dark mb-0" id="pv_curr_board">-</p></div>
+                                        <div class="col-md-4"><small class="text-muted text-uppercase fw-bold">Current School</small><p class="fw-bold text-dark mb-0" id="pv_curr_school">-</p></div>
+                                        <div class="col-md-4"><small class="text-muted text-uppercase fw-bold">Add JEE/NEET</small><p class="fw-bold text-dark mb-0" id="pv_jee_neet">-</p></div>
+                                    </div>
+
+                                    {% if 'Foundation' in course.name and 'Pre-Foundation' not in course.name %}
+                                    <div class="col-12 mt-3" id="pv_subjects_wrapper">
+                                        <small class="text-muted text-uppercase fw-bold">Selected Core Subjects</small>
+                                        <p class="fw-bold text-dark mb-0" id="pv_subjects">-</p>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="col-md-6 mt-3"><small class="text-muted text-uppercase fw-bold">Previous Board</small><p class="fw-bold text-dark mb-0" id="pv_prev_board">-</p></div>
+                                    <div class="col-md-6 mt-3"><small class="text-muted text-uppercase fw-bold">Previous School</small><p class="fw-bold text-dark mb-0" id="pv_prev_school">-</p></div>
+                                    
+                                    <div class="col-md-3 mt-3"><small class="text-muted text-uppercase fw-bold">Passing Year</small><p class="fw-bold text-dark mb-0" id="pv_prev_year">-</p></div>
+                                    <div class="col-md-3 mt-3"><small class="text-muted text-uppercase fw-bold">Marks</small><p class="fw-bold text-dark mb-0" id="pv_prev_marks">-</p></div>
+                                    <div class="col-md-3 mt-3"><small class="text-muted text-uppercase fw-bold">Percentage</small><p class="fw-bold text-dark mb-0" id="pv_prev_perc">-</p></div>
+                                    <div class="col-md-3 mt-3"><small class="text-muted text-uppercase fw-bold">Division</small><p class="fw-bold text-dark mb-0" id="pv_prev_div">-</p></div>
+                                </div>
+                            </div>
+
+                            <div class="form-section border-primary border-opacity-25" style="background-color: #f8fbff;">
+                                <h4 class="form-section-title text-primary"><i class="fas fa-credit-card bg-white text-primary shadow-sm"></i> Select Payment Plan</h4>
+                                
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="w-100 mb-0 position-relative">
+                                            <input type="radio" name="payment_mode" value="full" class="payment-radio" checked>
+                                            <div class="payment-option-card d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="fw-bold text-dark mb-1">Pay in Full</h5>
+                                                    <small class="text-muted fw-bold">One-time payment for the academic year.</small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <h4 class="fw-bold text-primary mb-0" id="previewTotalFee">₹0</h4>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="w-100 mb-0 position-relative">
+                                            <input type="radio" name="payment_mode" value="emi_3" class="payment-radio">
+                                            <div class="payment-option-card">
+                                                <h5 class="fw-bold text-dark mb-1">3 Months EMI</h5>
+                                                <small class="text-muted fw-bold d-block mb-3">Pay easily over 3 installments.</small>
+                                                <h4 class="fw-bold text-primary mb-0" id="emi3Amount">₹0 <span class="fs-6 text-muted fw-normal">/ mo</span></h4>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="w-100 mb-0 position-relative">
+                                            <input type="radio" name="payment_mode" value="emi_6" class="payment-radio">
+                                            <div class="payment-option-card">
+                                                <h5 class="fw-bold text-dark mb-1">6 Months EMI</h5>
+                                                <small class="text-muted fw-bold d-block mb-3">Lowest monthly burden.</small>
+                                                <h4 class="fw-bold text-primary mb-0" id="emi6Amount">₹0 <span class="fs-6 text-muted fw-normal">/ mo</span></h4>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn w-100 py-3 rounded-pill fw-bold text-uppercase fs-5 shadow-sm" style="background-color: #25d366; color: #000; border: none; letter-spacing: 1px;">
+                                Confirm Details & Pay <i class="fas fa-check-circle ms-2"></i>
+                            </button>
+
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const courseId = "{{ course.id }}";
+            let basePrice = parseInt("{{ course.price }}");
+            
+            // Elements
+            const boardSelect = document.getElementById('currentBoardSelect');
+            const jeeNeetCheckbox = document.getElementById('add_jee_neet');
+            const priceDisplay = document.getElementById('dynamicPriceDisplay');
+            const hiddenPriceInput = document.getElementById('hiddenPriceInput');
+            const subjectCheckboxes = document.querySelectorAll('input[name="subjects"]');
+
+            const previewTotalFee = document.getElementById('previewTotalFee');
+            const emi3Amount = document.getElementById('emi3Amount');
+            const emi6Amount = document.getElementById('emi6Amount');
+
+            function updatePrice() {
+                let finalPrice = basePrice; 
+
+                // Dynamic Logic for Pre-Foundation
+                if (courseId === 'pre-found-9' || courseId === 'pre-found-10') {
+                    if (boardSelect && boardSelect.value === 'ICSE') {
+                        finalPrice = 36000;
+                    } else {
+                        finalPrice = 25000; 
+                    }
+                    if (jeeNeetCheckbox && jeeNeetCheckbox.checked) {
+                        finalPrice += 11000;
+                    }
+                } 
+                // Dynamic Logic for Class 9 & 10 Combined
+                else if (courseId === 'pre-found-9-10') {
+                    if (boardSelect && boardSelect.value === 'ICSE') {
+                        finalPrice = 72000;
+                    } else {
+                        finalPrice = 50000; 
+                    }
+                    if (jeeNeetCheckbox && jeeNeetCheckbox.checked) {
+                        finalPrice += 22000;
+                    }
+                }
+                // Dynamic Logic for Foundation (Class 11, 12, 11&12)
+                else if (courseId.startsWith('found-')) {
+                    const numSubjects = document.querySelectorAll('input[name="subjects"]:checked').length;
+                    const isTwoYear = (courseId === 'found-11-12');
+                    const multiplier = isTwoYear ? 2 : 1; 
+                    
+                    if (numSubjects === 0) {
+                        finalPrice = 45500 * multiplier; 
+                    } else if (numSubjects === 1 || numSubjects === 2) {
+                        finalPrice = (15500 * multiplier) * numSubjects;
+                    } else if (numSubjects === 3) {
+                        finalPrice = 45500 * multiplier;
+                    } else if (numSubjects >= 4) {
+                        finalPrice = (45500 * multiplier) + (15500 * multiplier);
+                    }
+
+                    if (jeeNeetCheckbox && jeeNeetCheckbox.checked) {
+                        finalPrice += (9000 * multiplier);
+                    }
+                }
+                
+                // Update UI Prices
+                const formattedPrice = finalPrice.toLocaleString('en-IN');
+                if(priceDisplay) priceDisplay.innerText = '₹' + formattedPrice;
+                if(hiddenPriceInput) hiddenPriceInput.value = finalPrice;
+                
+                if(previewTotalFee) previewTotalFee.innerText = '₹' + formattedPrice;
+                
+                // Calculate EMIs
+                const emi3 = Math.ceil(finalPrice / 3);
+                const emi6 = Math.ceil(finalPrice / 6);
+                
+                if(emi3Amount) emi3Amount.innerHTML = '₹' + emi3.toLocaleString('en-IN') + ' <span class="fs-6 text-muted fw-normal">/ mo</span>';
+                if(emi6Amount) emi6Amount.innerHTML = '₹' + emi6.toLocaleString('en-IN') + ' <span class="fs-6 text-muted fw-normal">/ mo</span>';
+            }
+
+            if (boardSelect) boardSelect.addEventListener('change', updatePrice);
+            if (jeeNeetCheckbox) jeeNeetCheckbox.addEventListener('change', updatePrice);
+            subjectCheckboxes.forEach(cb => cb.addEventListener('change', updatePrice));
+            
+            // Run once on load
+            updatePrice();
+
+            // ==========================================
+            // PREVIEW MODAL LOGIC
+            // ==========================================
+            const form = document.getElementById('admissionForm');
+            const btnPreview = document.getElementById('btnPreviewForm');
+            const btnEdit = document.getElementById('btnEditForm');
+            const formSection = document.getElementById('formSection');
+            const previewSection = document.getElementById('previewSection');
+
+            // Payment radio update hidden input
+            const radioButtons = document.querySelectorAll('.payment-radio');
+            const hiddenPlan = document.getElementById('hiddenPaymentPlan');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    hiddenPlan.value = e.target.value;
+                });
+            });
+
+            btnPreview.addEventListener('click', function() {
+                // Trigger HTML5 Validation natively
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                // Populate Personal Details
+                document.getElementById('pv_name').innerText = form.student_name.value;
+                document.getElementById('pv_session').innerText = form.session_year.value;
+                document.getElementById('pv_email').innerText = form.student_email.value;
+                document.getElementById('pv_phone').innerText = form.student_phone.value;
+                document.getElementById('pv_parent_phone').innerText = form.parent_phone.value;
+                document.getElementById('pv_dob').innerText = form.dob.value;
+                document.getElementById('pv_gender').innerText = form.gender.value;
+                document.getElementById('pv_source').innerText = form.source.value;
+                document.getElementById('pv_father').innerText = form.father_name.value;
+                document.getElementById('pv_mother').innerText = form.mother_name.value;
+
+                // Populate Address Details
+                document.getElementById('pv_perm_addr').innerText = form.permanent_address.value;
+                document.getElementById('pv_local_addr').innerText = form.local_address.value || 'N/A';
+                document.getElementById('pv_pincode').innerText = form.pincode.value;
+
+                // Populate Previous Academics
+                document.getElementById('pv_prev_board').innerText = form.prev_board.value;
+                document.getElementById('pv_prev_school').innerText = form.prev_school.value;
+                document.getElementById('pv_prev_year').innerText = form.prev_year.value;
+                document.getElementById('pv_prev_marks').innerText = form.prev_obtained_marks.value + " / " + form.prev_max_marks.value;
+                document.getElementById('pv_prev_perc').innerText = form.prev_percentage.value + "%";
+                document.getElementById('pv_prev_div').innerText = form.prev_division.value;
+
+                // Conditional: Current Academics
+                const currBoard = form.current_board;
+                if(currBoard) {
+                    document.getElementById('pv_curr_board').innerText = currBoard.value;
+                    document.getElementById('pv_curr_school').innerText = form.current_school.value;
+                    document.getElementById('pv_jee_neet').innerText = form.add_jee_neet.checked ? "Yes" : "No";
+                    document.getElementById('pv_curr_block').style.display = 'flex';
+                } else {
+                    document.getElementById('pv_curr_block').style.display = 'none';
+                }
+
+                // Conditional: Subjects
+                if(document.getElementById('pv_subjects_wrapper')) {
+                    const selectedSubjects = Array.from(form.querySelectorAll('input[name="subjects"]:checked')).map(cb => cb.value).join(", ");
+                    document.getElementById('pv_subjects').innerText = selectedSubjects || "No subjects selected";
+                }
+
+                // Load Image Previews
+                const photoInput = form.student_image;
+                if (photoInput.files && photoInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { document.getElementById('previewPhoto').src = e.target.result; }
+                    reader.readAsDataURL(photoInput.files[0]);
+                }
+
+                const aadharInput = form.aadhar_card;
+                if (aadharInput.files && aadharInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { document.getElementById('previewAadhar').src = e.target.result; }
+                    reader.readAsDataURL(aadharInput.files[0]);
+                }
+
+                // Transition UI
+                formSection.style.display = 'none';
+                previewSection.style.display = 'block';
+                
+                // Scroll to top of modal
+                document.querySelector('.modal-body').scrollTop = 0;
+            });
+
+            btnEdit.addEventListener('click', function() {
+                previewSection.style.display = 'none';
+                formSection.style.display = 'block';
+                document.querySelector('.modal-body').scrollTop = 0;
+            });
+        });
+    </script>
+</body>
+</html>

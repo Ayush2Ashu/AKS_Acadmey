@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AKS Master Backup</title>
+    <style>
+        /* Landscape layout for better data fitting */
+        @page { 
+            size: A4 landscape; 
+            margin: 1cm; 
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0.5cm;
+                margin-left: 1cm;
+                margin-right: 1cm;
+                height: 1cm; 
+            }
+        }
+        
+        body { font-family: Helvetica, sans-serif; font-size: 11px; color: #333; }
+        
+        .header { text-align: center; border-bottom: 2px solid #003566; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #003566; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;}
+        .header p { margin: 5px 0 0 0; color: #666; font-size: 12px; }
+        
+        .section-title { background-color: #003566; color: white; padding: 8px 12px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; font-size: 12px;}
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { border: 1px solid #cccccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f7f6; color: #003566; font-weight: bold; font-size: 10px; text-transform: uppercase;}
+        
+        .status-approved { color: #198754; font-weight: bold; }
+        .status-pending { color: #d97706; font-weight: bold; }
+        .status-completed { color: #0dcaf0; font-weight: bold; }
+        .status-rejected { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>AKS ACADEMY - MASTER DATABASE BACKUP</h1>
+        <p>Official Student Enrollment Records | Generated securely from the Admin Command Center</p>
+    </div>
+
+    <div class="section-title">Course Admissions Records</div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Student Name</th>
+                <th>Phone (WhatsApp)</th>
+                <th>Course Enrolled & Target</th>
+                <th>Admission Date</th>
+                <th>Amount Paid</th>
+                <th>Current Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enroll in enrolls %}
+            <tr>
+                <td style="font-weight: bold; color: #555;">AKS-{{ "%04d" | format(enroll.id) }}</td>
+                <td style="text-transform: uppercase; font-weight: bold;">{{ enroll.student }}</td>
+                <td>{{ enroll.student_phone }}</td>
+                <td>
+                    <strong>{{ enroll.course }}</strong><br>
+                    <span style="color: #666; font-size: 9px;">Target: {{ enroll.target_year }}</span>
+                </td>
+                <td>{{ enroll.admission_date }}</td>
+                <td style="font-weight: bold;">Rs. {{ enroll.amount_paid }}</td>
+                <td>
+                    {% if enroll.status == 'Approved' %}
+                        <span class="status-approved">Approved</span>
+                    {% elif enroll.status == 'Completed' %}
+                        <span class="status-completed">Completed</span>
+                    {% elif enroll.status == 'Pending' %}
+                        <span class="status-pending">Pending</span>
+                    {% else %}
+                        <span class="status-rejected">{{ enroll.status }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 20px; color: #888;">No course admissions recorded yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footerContent" style="text-align: center; font-size: 9px; color: #888888; border-top: 1px solid #eeeeee; padding-top: 5px;">
+        AKS Academy Management System &copy; 2026 | Confidential Data
+    </div>
+
+</body>
+</html>

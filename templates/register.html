@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | AKS Academy</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1500');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        /* Floating Home Button */
+        .home-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: 0.3s;
+            text-decoration: none;
+            z-index: 10;
+        }
+        .home-btn:hover { background: white; color: #003566; transform: translateY(-2px); }
+
+        /* Main Card Styling */
+        .register-card {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .academy-logo-icon {
+            width: 70px;
+            height: 70px;
+            background: #003566;
+            color: #00d4ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(0, 53, 102, 0.2);
+        }
+
+        /* Input Styling */
+        .input-group { margin-bottom: 20px; }
+        .input-group-text { background: #f8f9fa; border-right: none; border-radius: 12px 0 0 12px; color: #6c757d; }
+        .form-control { background: #f8f9fa; border-left: none; border-radius: 0 12px 12px 0; padding: 12px 15px; }
+        .form-control:focus { background: white; box-shadow: none; border-color: #dee2e6; }
+        .input-group:focus-within .input-group-text, .input-group:focus-within .form-control {
+            background: white; border-color: #003566; color: #003566;
+        }
+
+        /* Button Styling */
+        .btn-register { 
+            background: #003566; color: white; border-radius: 12px; 
+            padding: 14px; font-weight: 600; width: 100%; transition: 0.3s; 
+            border: none; margin-top: 10px;
+        }
+        .btn-register:hover { 
+            background: #001d3d; color: white; 
+            transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,53,102,0.3); 
+        }
+
+        .login-link { color: #003566; font-weight: 700; text-decoration: none; transition: 0.3s; }
+        .login-link:hover { color: #00d4ff; }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="home-btn shadow-sm">
+        <i class="fas fa-arrow-left me-2"></i> Home
+    </a>
+
+    <div class="register-card">
+        
+        <div class="academy-logo-icon">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+
+        <h3 class="text-center fw-bold mb-1" style="color: #003566;">Join AKS Academy</h3>
+        <p class="text-center text-muted small mb-4">Create your account to access premium courses.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} small py-2 rounded-3 shadow-sm">
+                  <i class="fas fa-info-circle me-2"></i>{{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="/register" method="POST">
+
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+            </div>
+
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+            </div>
+
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
+                <input type="tel" name="phone" class="form-control" placeholder="WhatsApp / Phone Number" required>
+            </div>
+
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" name="password" class="form-control" placeholder="Create Password" required>
+            </div>
+
+            <button type="submit" class="btn btn-register">
+                Create Account <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+
+        </form>
+
+        <p class="text-center mt-4 small mb-0 text-muted">
+            Already have an account? <a href="/login" class="login-link">Log in here</a>
+        </p>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

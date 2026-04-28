@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AKS Academy</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; overflow-x: hidden; }
+
+        /* Unified Navbar */
+        .navbar { background: rgba(13, 27, 42, 0.95) !important; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.4s; }
+        .navbar-brand { font-weight: 800; letter-spacing: 1.5px; color: #00d4ff !important; text-transform: uppercase; }
+        .nav-link { color: #e0e1dd !important; transition: 0.3s; }
+        .nav-link:hover { color: #00d4ff !important; }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, #001d3d 0%, #003566 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 25px;
+            margin-top: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .dashboard-header::after {
+            content: '\f19d';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 150px;
+            color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Enrolled Course Cards */
+        .enrollment-card {
+            background: white;
+            border: none;
+            border-radius: 15px;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .enrollment-card.approved { border-left: 6px solid #00d4ff; }
+        .enrollment-card.pending { border-left: 6px solid #ffc107; }
+        .enrollment-card.completed { border-left: 6px solid #198754; }
+        .enrollment-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+        /* Live Indicator Animation */
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #dc3545;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+
+        /* Roadmap Timeline */
+        .timeline { position: relative; padding-left: 30px; list-style: none; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; border-radius: 4px; }
+        .timeline-item { position: relative; margin-bottom: 25px; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -34px; top: 4px; width: 14px; height: 14px;
+            border-radius: 50%; background: #00d4ff; border: 2px solid white; box-shadow: 0 0 0 3px rgba(0,212,255,0.2);
+        }
+        .timeline-item.completed::before { background: #198754; box-shadow: 0 0 0 3px rgba(25,135,84,0.2); }
+        .timeline-item.pending::before { background: #adb5bd; box-shadow: none; border: 2px solid #e9ecef; }
+
+        /* Quick Action Cards */
+        .action-card {
+            border: none; border-radius: 20px; background: white; padding: 30px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            transition: 0.4s; position: relative; overflow: hidden; z-index: 1;
+        }
+        .action-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 0%;
+            background: linear-gradient(135deg, #00d4ff 0%, #007bff 100%);
+            transition: 0.4s; z-index: -1; border-radius: 20px;
+        }
+        .action-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,123,255,0.2); color: white !important; }
+        .action-card:hover::before { height: 100%; }
+        .action-card:hover p, .action-card:hover h4 { color: white !important; }
+        .action-icon { font-size: 2.5rem; color: #007bff; margin-bottom: 20px; transition: 0.4s; }
+        .action-card:hover .action-icon { color: white; transform: scale(1.1); }
+        .action-card:hover .btn { background: white; color: #007bff; border-color: white; }
+
+        /* Empty State */
+        .empty-state { border: 2px dashed #ced4da; background: #fff; padding: 50px; border-radius: 25px; text-align: center; }
+
+        /* Premium Footer */
+        footer { background: #0d1b2a; color: #e0e1dd; padding: 80px 0 30px; margin-top: 80px; border-top: 4px solid #00d4ff; }
+        .footer-link { color: #adb5bd; text-decoration: none; transition: 0.3s; display: block; margin-bottom: 10px; }
+        .footer-link:hover { color: #00d4ff; padding-left: 5px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+                <img src="/static/images/aks_logo.jpeg" alt="AKS Academy Logo" width="45" height="45" class="me-2 rounded-circle bg-white p-1">
+                 AKS ACADEMY
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto text-center align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link px-3 fw-bold" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">
+                            <i class="fas fa-user-circle me-1 fs-5 align-middle"></i> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold text-warning" href="/courses"><i class="fas fa-book me-1"></i> Browse Courses</a>
+                    </li>
+                    <li class="nav-item"><a class="btn btn-outline-info ms-lg-3 px-4 fw-bold active" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="btn btn-danger ms-lg-2 px-3 rounded-pill shadow-sm" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="mt-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm rounded-pill px-4" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="dashboard-header">
+            <h1 class="display-5 fw-bold mb-2">Welcome Back, <span style="color: #00d4ff;">{{ name }}</span>!</h1>
+            <p class="fs-5 opacity-75 mb-0"><i class="fas fa-user-graduate me-2"></i>AKS Academy Student Portal</p>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" style="background: linear-gradient(135deg, #001d3d 0%, #00509e 100%); border-left: 5px solid #ffc107 !important;">
+            <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                <div class="text-white mb-3 mb-md-0 pe-md-4">
+                    <h5 class="fw-bold mb-1 text-warning"><i class="fas fa-star me-2"></i>AKS-SAT Scholarship Exam</h5>
+                    <p class="mb-0 small text-white-50">Get up to <strong class="text-white">50% OFF</strong> on your total fee. Syllabus: Basic Aptitude, Physics, Chemistry, Biology & Math.</p>
+                </div>
+                <a href="/apply_sat" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark shadow text-nowrap">
+                    Apply Now <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+        
+        {% if enrollments %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4 text-dark"><i class="fas fa-bell text-danger me-2"></i>Reminders & Alerts</h3>
+            
+            {% set reminder_found = false %}
+            {% for enroll in enrollments %}
+                {% if 'EMI' in enroll.payment_plan and enroll.status == 'Approved' %}
+                    {% set outstanding = enroll.payable_fee - enroll.amount_paid %}
+                    {% if outstanding > 0 %}
+                        {% set reminder_found = true %}
+                        
+                        {% if '3 Month' in enroll.payment_plan %}
+                            {% set fixed_emi = (enroll.payable_fee / 3) | round | int %}
+                        {% elif '6 Month' in enroll.payment_plan %}
+                            {% set fixed_emi = (enroll.payable_fee / 6) | round | int %}
+                        {% else %}
+                            {% set fixed_emi = outstanding %}
+                        {% endif %}
+                        {% set next_payment = fixed_emi if outstanding > fixed_emi else outstanding %}
+
+                        <div class="alert alert-danger bg-white border-danger border-start border-4 shadow-sm p-4 rounded-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                            <div class="mb-3 mb-md-0">
+                                <h5 class="fw-bold text-danger mb-2"><i class="fas fa-calendar-times me-2"></i> Upcoming EMI Installment Due</h5>
+                                <p class="mb-0 text-muted" style="line-height: 2;">
+                                    Your next EMI payment of <strong class="text-danger fw-bold">₹{{ '{:,}'.format(next_payment) }}</strong> for <strong class="text-dark">{{ enroll.course }}</strong> is due on 
+                                    <strong class="text-danger border border-danger rounded-pill px-3 py-1 mx-1 bg-danger bg-opacity-10 emi-due-date">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                    </strong> 
+                                </p>
+                            </div>
+                            
+                            <button data-bs-toggle="modal" data-bs-target="#payEmiModal{{ enroll.id }}" class="btn btn-danger fw-bold rounded-pill px-4 py-2 shadow-sm text-nowrap">
+                                Pay ₹{{ '{:,}'.format(next_payment) }} <i class="fas fa-qrcode ms-1"></i>
+                            </button>
+                        </div>
+
+                        <div class="modal fade" id="payEmiModal{{ enroll.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                    <div class="modal-header bg-danger text-white border-0 p-4">
+                                        <h5 class="fw-bold mb-0"><i class="fas fa-qrcode me-2"></i>Pay EMI Installment</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body p-4 text-center">
+                                        <h6 class="fw-bold text-dark mb-1">{{ enroll.course }}</h6>
+                                        <p class="text-muted small mb-4">Roll No: AKS-2026-{{ "%05d" | format(enroll.id) }}</p>
+                                        
+                                        <div class="p-3 bg-light border border-danger border-opacity-25 rounded-4 d-inline-block mb-4 shadow-sm">
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3D9430336006%40okbizaxis%26pn%3DAKS%2520Academy%26am%3D{{ next_payment }}%26cu%3DINR" alt="Payment QR Code" class="img-fluid rounded-3" style="width: 200px; height: 200px;">
+                                        </div>
+                                        
+                                        <h3 class="fw-bold text-danger mb-1">₹{{ '{:,}'.format(next_payment) }}</h3>
+                                        <p class="fw-bold text-muted mb-4 small">UPI ID: <span class="text-dark">9430336006@okbizaxis</span></p>
+
+                                        <div class="alert alert-warning small text-start border-0 bg-warning bg-opacity-10 mb-4">
+                                            <i class="fas fa-info-circle me-2"></i><strong>Important:</strong> After completing the payment, please share the screenshot on WhatsApp to get your official receipt updated.
+                                        </div>
+
+                                        <a href="https://wa.me/919430336006?text=Hello,%20I%20have%20paid%20my%20EMI%20of%20Rs.{{ next_payment }}%20for%20{{ enroll.course }}.%20My%20Roll%20No%20is%20AKS-2026-{{ '%05d' | format(enroll.id) }}.%20Attached%20is%20my%20payment%20screenshot." target="_blank" class="btn btn-success w-100 fw-bold rounded-pill py-2 shadow-sm">
+                                            <i class="fab fa-whatsapp me-2"></i> Share Screenshot
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if not reminder_found %}
+                <div class="alert alert-success bg-white border-success border-start border-4 shadow-sm p-3 rounded-4 d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="fas fa-check-circle text-success fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">You're all caught up!</h6>
+                        <p class="text-muted small mb-0">You have no pending payments or urgent alerts.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4 text-dark"><i class="fas fa-laptop-code text-primary me-2"></i>My Learning</h3>
+            <div class="row g-4">
+                {% for enroll in enrollments %}
+                <div class="col-md-6 col-lg-4 d-flex">
+                    
+                    {% if enroll.status == 'Pending' %}
+                        <div class="card p-4 h-100 w-100 shadow-sm enrollment-card pending">
+                            <h5 class="fw-bold text-dark mb-1">{{ enroll.course }}</h5>
+                            <p class="text-muted small mb-3">Status: <span class="badge bg-warning text-dark border border-warning px-2 py-1">Waiting for Approval</span></p>
+                            
+                            <div class="alert alert-warning small p-2 mb-3 border-0 mt-auto">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Admin is verifying your payment and Aadhar document.
+                            </div>
+                            
+                            <a href="/download_slip/{{ enroll.id }}" class="btn btn-outline-dark w-100 fw-bold rounded-pill mt-2">
+                                <i class="fas fa-file-pdf me-2"></i> Download Slip
+                            </a>
+                        </div>
+                    {% elif enroll.status == 'Completed' %}
+                        <div class="card p-4 h-100 w-100 shadow-sm enrollment-card completed bg-success bg-opacity-10">
+                            <h5 class="fw-bold text-success mb-1">{{ enroll.course }}</h5>
+                            <p class="text-muted small mb-3">Status: <span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-double me-1"></i> Completed</span></p>
+                            <p class="text-success small fw-bold mt-auto"><i class="fas fa-graduation-cap me-1"></i> Congratulations on completing this batch!</p>
+                            
+                            <span class="btn btn-light text-muted w-100 fw-bold rounded-pill mt-2 disabled" style="cursor: not-allowed; border: 1px solid #ced4da;">
+                                <i class="fas fa-check-double me-2"></i> Course Concluded
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="card p-4 h-100 w-100 shadow-sm enrollment-card approved">
+                            <h5 class="fw-bold text-dark mb-1">{{ enroll.course }}</h5>
+                            <p class="text-muted small mb-3">Status: <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1">Active</span></p>
+                            
+                            <div class="d-flex flex-column gap-2 mt-auto pt-3">
+                                <a href="/coming_soon" class="btn btn-outline-danger btn-sm text-start fw-bold rounded-pill px-3 py-2">
+                                    <span class="live-indicator"></span> Join Live Class
+                                </a>
+                                <a href="/coming_soon" class="btn btn-outline-primary btn-sm text-start fw-bold rounded-pill px-3 py-2">
+                                    <i class="fas fa-play-circle me-2"></i> Watch Recordings
+                                </a>
+                                
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#materialsModal{{ enroll.id }}" class="btn btn-outline-info btn-sm text-start fw-bold rounded-pill px-3 py-2">
+                                    <i class="fas fa-book me-2"></i> Study Materials
+                                </button>
+                                
+                                <a href="/download_slip/{{ enroll.id }}" class="btn btn-outline-success btn-sm text-start fw-bold rounded-pill px-3 py-2">
+                                    <i class="fas fa-receipt me-2"></i> Download Fee Receipt
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="materialsModal{{ enroll.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                    <div class="modal-header bg-light border-0">
+                                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-book-open text-info me-2"></i>Study Materials: {{ enroll.course }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body p-4 text-start">
+                                        <div class="row g-3">
+                                            {% set has_materials = namespace(found=false) %}
+                                            
+                                            {% for mat in materials %}
+                                                {% if mat.batch == 'All Batches' or mat.batch == enroll.course %}
+                                                    {% set has_materials.found = true %}
+                                                    <div class="col-md-6">
+                                                        <div class="p-3 border border-info border-opacity-25 rounded-4 bg-light d-flex align-items-center justify-content-between h-100">
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="fas fa-file-pdf fa-2x text-danger me-3"></i>
+                                                                <div>
+                                                                    <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ mat.title }}</h6>
+                                                                    <small class="text-muted" style="font-size: 0.75rem;">{{ mat.upload_date }}</small>
+                                                                </div>
+                                                            </div>
+                                                            <a href="/static/uploads/materials/{{ mat.filename }}" target="_blank" class="btn btn-sm btn-info rounded-circle text-dark shadow-sm" style="width: 35px; height: 35px; line-height: 22px;">
+                                                                <i class="fas fa-download"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                            
+                                            {% if not has_materials.found %}
+                                                <div class="col-12 text-center py-4">
+                                                    <i class="fas fa-folder-open fa-3x text-muted mb-3 opacity-25"></i>
+                                                    <h6 class="text-muted fw-bold">No Materials Yet</h6>
+                                                    <p class="text-muted small mb-0">Study resources for your batch will appear here once uploaded by the admin.</p>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4 text-dark"><i class="fas fa-map-marked-alt text-success me-2"></i>My Learning Roadmaps</h3>
+            {% for enroll in enrollments %}
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4">
+                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">{{ enroll.course }} Roadmap</h5>
+                <ul class="timeline mb-0">
+                    
+                    <li class="timeline-item completed">
+                        <h6 class="fw-bold text-dark mb-1">Enrollment & Registration</h6>
+                        <p class="text-muted small mb-0">Form submitted securely to AKS Academy.</p>
+                    </li>
+
+                    {% if enroll.status == 'Pending' %}
+                        <li class="timeline-item pending">
+                            <h6 class="fw-bold text-secondary mb-1">Document & Payment Verification</h6>
+                            <p class="text-muted small mb-0">Waiting for Admin to approve your Aadhar card.</p>
+                        </li>
+                        <li class="timeline-item pending">
+                            <h6 class="fw-bold text-secondary mb-1">Course Activation</h6>
+                            <p class="text-muted small mb-0">LMS access will be granted upon approval.</p>
+                        </li>
+                    
+                    {% elif enroll.status == 'Approved' %}
+                        <li class="timeline-item completed">
+                            <h6 class="fw-bold text-dark mb-1">Document & Payment Verification</h6>
+                            <p class="text-muted small mb-0">Approved! Aadhar verified.</p>
+                        </li>
+                        <li class="timeline-item">
+                            <h6 class="fw-bold text-primary mb-1">Core Syllabus <span class="badge bg-primary ms-2 px-2 py-1">In Progress</span></h6>
+                            <p class="text-muted small mb-0">Currently attending live lectures and submitting assignments.</p>
+                        </li>
+                        <li class="timeline-item pending" style="margin-bottom: 0;">
+                            <h6 class="fw-bold text-secondary mb-1">Course Completion</h6>
+                            <p class="text-muted small mb-0">Complete all modules to finish the program.</p>
+                        </li>
+                    
+                    {% elif enroll.status == 'Completed' %}
+                        <li class="timeline-item completed">
+                            <h6 class="fw-bold text-dark mb-1">Document & Payment Verification</h6>
+                            <p class="text-muted small mb-0">Approved! Aadhar verified.</p>
+                        </li>
+                        <li class="timeline-item completed">
+                            <h6 class="fw-bold text-dark mb-1">Core Syllabus</h6>
+                            <p class="text-muted small mb-0">All live lectures and assignments submitted.</p>
+                        </li>
+                        <li class="timeline-item completed" style="margin-bottom: 0;">
+                            <h6 class="fw-bold text-success mb-1">Course Completed <i class="fas fa-check-circle ms-1"></i></h6>
+                            <p class="text-success small mb-0 fw-bold">Congratulations! You have successfully graduated from this batch.</p>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4 text-dark"><i class="fas fa-chart-line text-success me-2"></i>My Progress Reports</h3>
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4">
+                {% if reports %}
+                    <div class="row g-4">
+                        {% for report in reports %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="p-4 border border-success border-opacity-25 rounded-4 bg-light d-flex align-items-center justify-content-between h-100" style="transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(25,135,84,0.1)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">{{ report.title }}</h5>
+                                    <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>{{ report.upload_date }}</small>
+                                </div>
+                                <a href="/static/uploads/progress/{{ report.filename }}" target="_blank" class="btn btn-success rounded-circle shadow-sm" style="width: 45px; height: 45px; line-height: 33px; text-align: center;" title="Download Report">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-pdf fa-3x text-muted mb-3 opacity-25"></i>
+                        <h5 class="text-muted fw-bold">No Reports Yet</h5>
+                        <p class="text-muted small mb-0">Your progress reports and marksheets will appear here once uploaded by the admin.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <h3 class="fw-bold mb-4 text-dark mt-5"><i class="fas fa-bolt text-warning me-2"></i>Quick Actions</h3>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="action-card h-100">
+                        <i class="fas fa-layer-group action-icon"></i>
+                        <h4 class="fw-bold text-dark">Explore Courses</h4>
+                        <p class="text-muted small">Find new batches for JEE, NDA, BOARDS, and more.</p>
+                        <a href="/courses" class="btn btn-outline-primary rounded-pill w-100 fw-bold mt-2">View Catalog</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="action-card h-100">
+                        <i class="fas fa-headset action-icon"></i>
+                        <h4 class="fw-bold text-dark">Help & Support</h4>
+                        <p class="text-muted small">Contact the administration for any issues.</p>
+                        <a href="https://wa.me/919430336006" target="_blank" class="btn btn-outline-primary rounded-pill w-100 fw-bold mt-2"><i class="fab fa-whatsapp me-2"></i>Chat Support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+            <div class="text-center py-5 bg-white rounded-4 shadow-sm border mt-4">
+                <img src="/static/images/aks_logo.jpeg" width="100" class="opacity-50 mb-4 rounded-circle">
+                <h2 class="fw-bold text-dark mb-2">Welcome to AKS Academy, {{ name }}!</h2>
+                <p class="text-muted mb-4">You haven't enrolled in any target batches or foundation courses yet.</p>
+                <a href="/courses" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">Explore Courses <i class="fas fa-arrow-right ms-2"></i></a>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #001d3d 0%, #003566 100%); height: 130px; position: relative;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center px-4 pb-5 position-relative">
+                    <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow" style="width: 110px; height: 110px; margin-top: -65px; border: 5px solid white;">
+                        <i class="fas fa-user-graduate text-primary" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3 mb-0 text-dark">{{ name }}</h3>
+                    
+                    {% if enrollments %}
+                        {% set active_course = enrollments[-1] %}
+                        {% if active_course.status in ['Approved', 'Completed'] %}
+                            <p class="text-primary fw-bold mt-2 mb-1"><i class="fas fa-id-badge me-1"></i> Roll No: AKS-2026-{{ "%05d" | format(active_course.id) }}</p>
+                            
+                            <div class="bg-light rounded-4 p-4 text-start shadow-sm border border-white mt-3 mb-4">
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-book-open text-primary me-2"></i>Course & Fee Details</h6>
+                                
+                                <div class="d-flex justify-content-between small mb-2">
+                                    <span class="text-muted">Enrolled Course:</span>
+                                    <span class="fw-bold text-dark">{{ active_course.course }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between small mb-2">
+                                    <span class="text-muted">Payment Plan:</span>
+                                    <span class="fw-bold text-info">{{ active_course.payment_plan }}</span>
+                                </div>
+
+                                {% set outstanding = active_course.payable_fee - active_course.amount_paid %}
+                                {% if outstanding > 0 %}
+                                    
+                                    {% if '3 Month' in active_course.payment_plan %}
+                                        {% set fixed_emi = (active_course.payable_fee / 3) | round | int %}
+                                    {% elif '6 Month' in active_course.payment_plan %}
+                                        {% set fixed_emi = (active_course.payable_fee / 6) | round | int %}
+                                    {% else %}
+                                        {% set fixed_emi = outstanding %}
+                                    {% endif %}
+                                    
+                                    {% set next_payment = fixed_emi if outstanding > fixed_emi else outstanding %}
+
+                                    <div class="d-flex justify-content-between small mb-3">
+                                        <span class="text-muted">Total Pending Balance:</span>
+                                        <span class="fw-bold text-danger">₹{{ '{:,}'.format(outstanding) }}</span>
+                                    </div>
+                                    
+                                    {% if 'EMI' in active_course.payment_plan %}
+                                    <div class="d-flex justify-content-between align-items-center small mt-2 pt-3 border-top border-warning">
+                                        <span class="text-danger fw-bold"><i class="fas fa-calendar-times me-1"></i> Next EMI Due Amount:</span>
+                                        <span class="badge bg-warning text-dark px-3 py-2 fs-6 shadow-sm border border-warning">₹{{ '{:,}'.format(next_payment) }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                {% else %}
+                                    <div class="d-flex justify-content-between align-items-center small mt-2 pt-3 border-top border-success">
+                                        <span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i> Fee Status:</span>
+                                        <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">100% Fully Paid</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                        {% else %}
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-1 mt-2 mb-3 fw-bold"><i class="fas fa-hourglass-half me-1"></i> Admission Pending</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-info text-dark rounded-pill px-3 py-1 mt-2 mb-3 fw-bold">AKS Academy Student</span>
+                    {% endif %}
+
+                    <div class="bg-light rounded-4 p-4 text-start shadow-sm border border-white mt-2">
+                        <p class="mb-3 text-muted small fw-bold text-uppercase letter-spacing-1">Account Dashboard Summary</p>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white p-2 rounded-circle shadow-sm me-3 text-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-book-open text-primary mt-1"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">Enrolled Courses</h6>
+                                <small class="text-muted">{{ enrollments|length }} Active Registration(s)</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white p-2 rounded-circle shadow-sm me-3 text-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-shield-alt text-success mt-1"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">Account Status</h6>
+                                <small class="text-muted">Verified & Secure</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="row g-4 text-md-start text-center">
+                <div class="col-md-4">
+                    <h3 class="text-white fw-bold mb-3">AKS ACADEMY</h3>
+                    <p class="small opacity-75 pe-md-4">Elite coaching for JEE, NDA, and Boards in Jharkhand. Empowering the next generation of leaders with world-class resources.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="text-white fw-bold mb-4">Support Team</h5>
+                    <ul class="list-unstyled opacity-75 small">
+                        <li class="mb-2"><i class="fas fa-envelope me-2 text-info"></i> aksacademyranchi@gmail.com</li>
+                        <li><i class="fas fa-phone-alt me-2 text-info"></i> +91 94303 36006</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <div class="chat-box-footer" style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px;">
+                        <h5 class="text-white fw-bold mb-2">Need Help?</h5>
+                        <p class="small opacity-75 mb-3">Contact Ajeet Kumar for instant resolution.</p>
+                        <a href="https://wa.me/919430336006" target="_blank" class="btn btn-success rounded-3 px-4 py-2 fw-bold" style="background-color: #25d366; border: none;">
+                            <i class="fab fa-whatsapp me-2"></i> WhatsApp Desk
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-5 opacity-10">
+            <p class="text-center small opacity-50 mb-0">© 2026 AKS Academy | Designed for Excellence by Ajeet Kumar</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const today = new Date();
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 5);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const formattedDate = nextMonth.toLocaleDateString('en-US', options);
+            const dateElements = document.querySelectorAll('.emi-due-date');
+            dateElements.forEach(function(el) {
+                el.innerHTML = '<i class="fas fa-clock me-1"></i> ' + formattedDate;
+            });
+        });
+    </script>
+</body>
+</html>

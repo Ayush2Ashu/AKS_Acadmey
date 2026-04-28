@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to AKS Academy | Elite Coaching</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8f9fc; overflow-x: hidden; }
+
+        .navbar { background: rgba(13, 27, 42, 0.95) !important; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 1000;}
+        .navbar-brand { font-weight: 800; letter-spacing: 1.5px; color: #00d4ff !important; text-transform: uppercase; }
+
+        /* HERO SLIDER (Carousel) */
+        .carousel-item {
+            height: 90vh; 
+            min-height: 600px; 
+            background-color: #000;
+        }
+        .carousel-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            opacity: 0.5;
+            transition: transform 10s ease;
+        }
+        .carousel-item.active img {
+            transform: scale(1.05);
+        }
+        .carousel-caption {
+            bottom: 30%;
+            z-index: 10;
+        }
+        .carousel-caption h1 {
+            font-size: 4.5rem; 
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 4px 10px rgba(0,0,0,0.5);
+            color: #00d4ff;
+        }
+        .carousel-caption p {
+            font-size: 1.3rem;
+            font-weight: 300;
+            margin-bottom: 25px;
+            text-shadow: 1px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .slider-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(13,27,42,1) 0%, rgba(13,27,42,0) 40%);
+            z-index: 5;
+        }
+
+        /* THREE-COLUMN STATS BANNER */
+        .stats-section {
+            background-color: #001d3d; 
+            color: white;
+            padding: 50px 0;
+            border-bottom: 3px solid #00d4ff;
+        }
+        .stat-item h2 {
+            color: #ffc107; 
+            font-weight: 800;
+            font-size: 3.5rem;
+            margin-bottom: 5px;
+        }
+        .stat-item p {
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* QUICK FEATURES SECTION */
+        .features-section { padding: 80px 0; background-color: #f8f9fc; }
+        .section-title-line { width: 60px; height: 4px; background: #007bff; margin: 15px auto 50px; border-radius: 2px; }
+        
+        .feature-card {
+            padding: 40px 30px;
+            border-radius: 15px;
+            background: white;
+            text-align: center;
+            transition: 0.4s;
+            border: none;
+            border-bottom: 5px solid #007bff; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-bottom-color: #00d4ff;
+        }
+        .feature-icon {
+            font-size: 3rem;
+            color: #00509e;
+            margin-bottom: 20px;
+            transition: 0.4s;
+        }
+        .feature-card:hover .feature-icon { color: #00d4ff; transform: scale(1.1); }
+        .feature-title { font-weight: 800; color: #212529; margin-bottom: 15px; font-size: 1.3rem;}
+
+        /* Quick Action Cards */
+        .action-card {
+            border: none; border-radius: 20px; background: white; padding: 30px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            transition: 0.4s; position: relative; overflow: hidden; z-index: 1;
+        }
+        .action-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 0%;
+            background: linear-gradient(135deg, #00d4ff 0%, #007bff 100%);
+            transition: 0.4s; z-index: -1; border-radius: 20px;
+        }
+        .action-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,123,255,0.2); color: white !important; }
+        .action-card:hover::before { height: 100%; }
+        .action-card:hover p, .action-card:hover h4 { color: white !important; }
+        .action-icon { font-size: 2.5rem; color: #007bff; margin-bottom: 20px; transition: 0.4s; }
+        .action-card:hover .action-icon { color: white; transform: scale(1.1); }
+        .action-card:hover .btn { background: white; color: #007bff; border-color: white; }
+
+        /* PREMIUM FORM STYLING FOR ENQUIRY */
+        .form-control, .form-select { 
+            border-radius: 10px; 
+            padding: 14px 18px; 
+            border: 1px solid #d1d5db; 
+            background-color: #fcfcfc;
+            color: #2b3440;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .form-control:focus, .form-select:focus { 
+            border-color: #00509e; 
+            box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.1); 
+            background-color: #ffffff;
+        }
+
+        /* Branch Cards */
+        .branch-card { background: white; border-radius: 20px; transition: 0.3s; display: block; text-decoration: none; color: inherit; }
+        .branch-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,123,255,0.15); border-color: #00d4ff !important; }
+
+        /* FOOTER */
+        footer { background: #0d1b2a; color: #e0e1dd; padding: 60px 0 30px; border-top: 4px solid #00d4ff; }
+        .footer-link { color: #adb5bd; text-decoration: none; transition: 0.3s; display: block; margin-bottom: 10px; font-size: 0.9rem;}
+        .footer-link:hover { color: #00d4ff; padding-left: 5px; }
+        
+        @media screen and (max-width: 768px) {
+            .carousel-caption h1 { font-size: 2.5rem; }
+            .carousel-item { height: 75vh; min-height: 500px; } 
+            .stat-item { margin-bottom: 30px; }
+            .stat-item:last-child { margin-bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/static/images/aks_logo.jpeg" alt="AKS Academy Logo" width="45" height="45" class="me-2 rounded-circle bg-white p-1">
+                 AKS ACADEMY
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto text-center align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link px-3 active text-info fw-bold" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/courses">Courses</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/about">About Us</a></li>
+                    
+                    {% if session.get('user') %}
+                        <li class="nav-item"><a class="btn btn-warning rounded-pill ms-lg-3 px-4 fw-bold text-dark shadow-sm my-2 my-lg-0" href="/dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="btn btn-danger ms-lg-2 px-3 rounded-pill shadow-sm" href="/logout">Logout</a></li>
+                    {% elif session.get('admin_logged_in') or session.get('staff_logged_in') %}
+                        <li class="nav-item"><a class="btn btn-warning rounded-pill ms-lg-3 px-4 fw-bold text-dark shadow-sm my-2 my-lg-0" href="/admin">Admin Panel</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="btn btn-warning rounded-pill ms-lg-3 px-4 fw-bold text-dark shadow-sm my-2 my-lg-0" href="/login">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-pause="false">
+        <div class="carousel-indicators">
+            {% for slide in slides %}
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></button>
+            {% endfor %}
+        </div>
+        <div class="carousel-inner">
+            {% if slides %}
+                {% for slide in slides %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}" data-bs-interval="5000">
+                    <img src="/static/uploads/gallery/{{ slide.filename }}" alt="Gallery Slide">
+                    <div class="slider-overlay"></div>
+                    <div class="container h-100">
+                        <div class="carousel-caption">
+                            <h1 class="text-white">AKS ACADEMY</h1>
+                            <p>Empowering the next generation of leaders with world-class resources.</p>
+                            <a href="/courses" class="btn btn-outline-info rounded-pill px-5 py-3 fw-bold mt-2 shadow-lg">Explore Courses</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="carousel-item active" data-bs-interval="5000">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1920" alt="Students Studying">
+                    <div class="slider-overlay"></div>
+                    <div class="container h-100">
+                        <div class="carousel-caption">
+                            <h1 class="text-white">AKS ACADEMY</h1>
+                            <p>Empowering the next generation of leaders with world-class resources.</p>
+                            <a href="/courses" class="btn btn-info rounded-pill px-5 py-3 fw-bold text-dark mt-2 shadow-lg">Explore courses</a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stats-section text-center shadow-lg">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4 stat-item">
+                    <h2>500+</h2>
+                    <p>Students Enrolled</p>
+                </div>
+                <div class="col-md-4 stat-item">
+                    <h2>98%</h2>
+                    <p>Success Rate</p>
+                </div>
+                <div class="col-md-4 stat-item">
+                    <h2>100+</h2>
+                    <p>Mock Tests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5 pt-4">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #001d3d 0%, #00509e 100%);">
+            <div class="row g-0 align-items-center">
+                <div class="col-md-8 p-4 p-md-5 text-white">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold" style="letter-spacing: 1px;"><i class="fas fa-star me-1"></i> SCHOLARSHIP EXAM</span>
+                    </div>
+                    <h2 class="fw-bold mb-2">AKS-SAT 2026</h2>
+                    <h4 class="text-warning mb-4">Get up to <span class="fs-1 fw-bold">50% OFF</span> on your Total Fee!</h4>
+                    
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="bg-white bg-opacity-10 p-3 rounded-3 border border-white border-opacity-25 w-100">
+                            <p class="mb-1 text-white-50 small text-uppercase fw-bold"><i class="fas fa-book-open me-2 text-warning"></i> Test Syllabus</p>
+                            <p class="mb-0 fw-bold">Basic Aptitude, Physics, Chemistry, Biology & Mathematics. </p>
+                        </div>
+                    </div>
+
+                    <a href="/apply_sat" class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold shadow-sm text-dark text-uppercase" style="letter-spacing: 1px;">
+                        Apply for AKS-SAT <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+                <div class="col-md-4 d-none d-md-flex justify-content-center align-items-center p-5">
+                    <i class="fas fa-award text-white opacity-25" style="font-size: 10rem; transform: rotate(15deg);"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container my-5 py-4">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} rounded-4 shadow-sm mb-4 fw-bold text-center"><i class="fas fa-info-circle me-2"></i>{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row align-items-center bg-white rounded-4 shadow-sm overflow-hidden border border-light">
+            <div class="col-lg-6 p-0 d-none d-lg-block position-relative">
+                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800" alt="Enquiry" class="img-fluid h-100 w-100 object-fit-cover" style="min-height: 550px;">
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-primary bg-opacity-25"></div>
+            </div>
+            <div class="col-lg-6 p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-headset fa-2x text-info"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark">Request a Callback</h3>
+                    <p class="text-muted small">Not sure which course is right for you? Drop your details and our academic counselor will contact you.</p>
+                </div>
+
+                <form action="/submit_enquiry" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Course of Interest</label>
+                        <select class="form-select" name="course_interest" required>
+                            <option value="">Select a Course...</option>
+                            <option value="Pre-Foundation (Class 9-10)">Pre-Foundation (Class 9-10)</option>
+                            <option value="Foundation (Class 11-12)">Foundation (Class 11-12)</option>
+                            <option value="Target Batch (JEE)">Target Batch (JEE)</option>
+                            <option value="Target Batch (NEET)">Target Batch (NEET)</option>
+                            <option value="Target Batch (NDA)">Target Batch (NDA)</option>
+                            <option value="General Enquiry / Unsure">General Enquiry / Not Sure</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Full Name</label>
+                        <input type="text" class="form-control" name="enquiry_name" placeholder="E.g. Rahul Sharma" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Mobile Number</label>
+                        <input type="tel" class="form-control" name="enquiry_phone" placeholder="10-digit mobile number" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Email Address</label>
+                        <input type="email" class="form-control" name="enquiry_email" placeholder="name@example.com" required>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary w-100 py-3 rounded-pill fw-bold text-uppercase fs-6 shadow-sm">
+                        Submit Request <i class="fas fa-paper-plane ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="features-section">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="fw-bold text-dark">Why Choose AKS Academy?</h2>
+                <div class="section-title-line"></div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-chalkboard-teacher feature-icon"></i>
+                        <h4 class="feature-title">Expert Guidance</h4>
+                        <p class="text-muted mb-0 small">Direct mentorship from Ajeet Kumar and elite faculty for a competitive edge.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-laptop-code feature-icon"></i>
+                        <h4 class="feature-title">Smart Curriculum</h4>
+                        <p class="text-muted mb-0 small">A hybrid learning sanctuary with premium digital study materials and continuous evaluation.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-graduation-cap feature-icon"></i>
+                        <h4 class="feature-title">Proven Results</h4>
+                        <p class="text-muted mb-0 small">Scientific test series and modules optimized for Top Ranks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5 pt-4 pb-3">
+        <div class="text-center">
+            <h2 class="fw-bold text-dark">Quick Actions</h2>
+            <div class="section-title-line"></div>
+        </div>
+        <div class="row justify-content-center g-4 mt-2">
+            <div class="col-md-5">
+                <div class="action-card h-100">
+                    <i class="fas fa-layer-group action-icon"></i>
+                    <h4 class="fw-bold text-dark">Explore Courses</h4>
+                    <p class="text-muted small">Find new batches for JEE, NDA, Boards, and more.</p>
+                    <a href="/courses" class="btn btn-outline-primary rounded-pill w-100 fw-bold mt-2">View Catalog</a>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="action-card h-100">
+                    <i class="fas fa-headset action-icon"></i>
+                    <h4 class="fw-bold text-dark">Help & Support</h4>
+                    <p class="text-muted small">Contact the administration for any issues.</p>
+                    <a href="https://wa.me/919430336006" target="_blank" class="btn btn-outline-primary rounded-pill w-100 fw-bold mt-2"><i class="fab fa-whatsapp me-2"></i>Chat Support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5 py-5 rounded-4 shadow-sm" style="background-color: #f0f4f8;">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold display-6">Our Campuses in Ranchi</h2>
+            <div class="mx-auto bg-primary mt-2" style="height: 4px; width: 50px;"></div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            
+            <div class="col-md-5">
+                <a href="https://maps.google.com/?q=Lalpur,+Ranchi,+Jharkhand" target="_blank" class="p-5 border border-2 branch-card h-100 text-center">
+                    <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-map-marker-alt fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2">Lalpur Branch</h3>
+                    <p class="text-muted mb-4">Our premier center located in the heart of Ranchi's educational hub. Fully equipped with modern classrooms and our premium library.</p>
+                    <span class="btn btn-outline-primary rounded-pill btn-sm fw-bold px-4 py-2">
+                        View on Map <i class="fas fa-location-arrow ms-2"></i>
+                    </span>
+                </a>
+            </div>
+
+            <div class="col-md-5">
+                <a href="https://maps.google.com/?q=Kanke+Road,+Ranchi,+Jharkhand" target="_blank" class="p-5 border border-2 branch-card h-100 text-center">
+                    <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-map-marker-alt fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2">Kanke Road Branch</h3>
+                    <p class="text-muted mb-4">Our state-of-the-art facility serving students in the Kanke Road area, providing the same elite faculty and high-speed Wi-Fi.</p>
+                    <span class="btn btn-outline-primary rounded-pill btn-sm fw-bold px-4 py-2">
+                        View on Map <i class="fas fa-location-arrow ms-2"></i>
+                    </span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="row g-4 text-md-start text-center">
+                <div class="col-md-4">
+                    <h4 class="text-white fw-bold mb-3">AKS ACADEMY</h4>
+                    <p class="small opacity-75 pe-md-4">Elite coaching for JEE, NDA, and Boards Exam. Building the foundation for future leaders in Jharkhand.</p>
+                    
+                    <div class="mt-4">
+                        <a href="#" class="btn btn-outline-light rounded-circle p-2 me-2" style="width: 40px; height: 40px;"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-outline-light rounded-circle p-2" style="width: 40px; height: 40px;"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 ps-md-5">
+                    <h5 class="text-white fw-bold mb-4">Quick Links</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <a href="/" class="footer-link">Home</a>
+                            <a href="/courses" class="footer-link">Courses</a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/about" class="footer-link">About Us</a>
+                            {% if session.get('user') %}
+                                <a href="/dashboard" class="footer-link">Dashboard</a>
+                            {% else %}
+                                <a href="/login" class="footer-link">Login</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-4 border border-secondary rounded-4 bg-dark bg-opacity-50">
+                        <h5 class="text-white fw-bold mb-2">Chat with Us</h5>
+                        <p class="small opacity-75 mb-3">Have questions? Get an instant reply on WhatsApp.</p>
+                        <a href="https://wa.me/919430336006" class="btn btn-success rounded-3 px-4 fw-bold shadow-sm" target="_blank" style="background-color: #25d366; border: none;">
+                            <i class="fab fa-whatsapp me-2"></i> Message Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-5 opacity-10">
+            <p class="text-center small opacity-50 mb-0">© 2026 AKS Academy | Designed for Excellence by Ajeet Kumar</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Command Center | AKS Academy</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; }
+        
+        .navbar { background: #001d3d !important; border-bottom: 4px solid #00d4ff; }
+        .navbar-brand { font-weight: 800; letter-spacing: 1.5px; color: #ffffff !important; }
+        
+        .stat-card { border: none; border-radius: 15px; padding: 25px; color: white; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .stat-card i { position: absolute; right: -10px; bottom: -10px; font-size: 100px; opacity: 0.2; }
+        .bg-pending { background: linear-gradient(135deg, #dc3545 0%, #f67280 100%); }
+        .bg-enquiry { background: linear-gradient(135deg, #f59f00 0%, #fdca40 100%); }
+        .bg-students { background: linear-gradient(135deg, #007bff 0%, #00d4ff 100%); }
+
+        .nav-pills .nav-link { border-radius: 10px; color: #495057; font-weight: 600; padding: 12px 25px; margin-right: 10px; transition: 0.3s; }
+        .nav-pills .nav-link.active { background-color: #003566; color: white; box-shadow: 0 5px 15px rgba(0, 53, 102, 0.3); }
+        
+        .admin-card { background: white; border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow: hidden; }
+        .table { margin-bottom: 0; vertical-align: middle; }
+        .table th { background-color: #f8f9fc; color: #001d3d; font-weight: 700; border-bottom: 2px solid #e9ecef; padding: 15px; }
+        .table td { padding: 15px; border-bottom: 1px solid #f1f3f5; color: #444; }
+        
+        .badge-pending { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .badge-approved { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .badge-rejected { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .student-avatar { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; border: 2px solid #e9ecef; }
+        .gallery-thumb { width: 150px; height: 85px; object-fit: cover; border-radius: 8px; border: 2px solid #e9ecef; }
+        
+        .search-filter-wrapper .form-control:focus, .search-filter-wrapper .form-select:focus {
+            box-shadow: none; border-color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/admin">
+                <i class="fas fa-shield-alt text-info me-2"></i> 
+                {% if session.get('admin_logged_in') %}AKS ADMIN CENTER{% else %}AKS STAFF PORTAL{% endif %}
+            </a>
+            <div class="ms-auto d-flex align-items-center">
+                <span class="text-white me-4">
+                    <i class="fas fa-user-tie me-2"></i>
+                    {% if session.get('admin_logged_in') %}Welcome, Ajeet Sir{% else %}Welcome, Staff Desk{% endif %}
+                </span>
+                
+                {% if session.get('admin_logged_in') %}
+                <a href="/admin/download_report" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold me-3 shadow-sm">
+                    <i class="fas fa-file-pdf me-2 text-danger"></i>Download Backup
+                </a>
+                {% endif %}
+                
+                <a href="/logout" class="btn btn-danger btn-sm rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="fas fa-sign-out-alt me-2"></i>Lock System
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    {% set pend = namespace(count=0) %}
+    {% for e in enrollments %}{% if e.status == 'Pending' %}{% set pend.count = pend.count + 1 %}{% endif %}{% endfor %}
+    
+    {% set pend_enq = namespace(count=0) %}
+    {% for eq in enquiries %}{% if eq.status == 'Pending' %}{% set pend_enq.count = pend_enq.count + 1 %}{% endif %}{% endfor %}
+
+    <div class="container-fluid px-4 py-5">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                        <strong><i class="fas fa-info-circle me-2"></i> System Update:</strong> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row g-4 mb-5 justify-content-center">
+            <div class="col-md-4">
+                <div class="stat-card bg-pending">
+                    <i class="fas fa-hourglass-half"></i>
+                    <h5 class="fw-bold mb-1 opacity-75">Pending Approvals</h5>
+                    <h2 class="display-5 fw-bold mb-0">{{ pend.count }} <small class="fs-6 fw-normal">Action Required</small></h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card bg-enquiry text-dark">
+                    <i class="fas fa-headset text-dark opacity-25"></i>
+                    <h5 class="fw-bold mb-1 opacity-75">Pending Enquiries</h5>
+                    <h2 class="display-5 fw-bold mb-0">{{ pend_enq.count }} <small class="fs-6 fw-normal">To Call</small></h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card bg-students">
+                    <i class="fas fa-users"></i>
+                    <h5 class="fw-bold mb-1 opacity-75">Registered Accounts</h5>
+                    <h2 class="display-5 fw-bold mb-0">{{ users|length }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-pills mb-4" id="adminTabs" style="overflow-x: auto; flex-wrap: nowrap; white-space: nowrap;">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#courses"><i class="fas fa-graduation-cap me-2"></i>Course Admissions</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#enquiries"><i class="fas fa-headset me-2"></i>Counseling Enquiries</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#sat_apps"><i class="fas fa-star me-2"></i>AKS-SAT Apps</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#materials"><i class="fas fa-book-open me-2"></i>Study Materials</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#progress"><i class="fas fa-chart-line me-2"></i>Progress Reports</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#gallery"><i class="fas fa-images me-2"></i>Gallery Slider</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#users"><i class="fas fa-user-cog me-2"></i>Registered Users</button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            
+            <div class="tab-pane fade show active" id="courses">
+                
+                <div class="search-filter-wrapper row mx-0 g-3 align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm border border-light">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-primary"><i class="fas fa-search"></i></span>
+                            <input type="text" id="studentSearch" class="form-control bg-light border-0 fw-bold text-dark" placeholder="Search by Name, Roll No, Phone...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-danger"><i class="fas fa-calendar-alt"></i>&nbsp; Next Call</span>
+                            <input type="date" id="enrollDateFilter" class="form-control bg-light border-0 fw-bold text-dark">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="fw-bold text-muted small text-uppercase mb-0 text-nowrap"><i class="fas fa-filter me-1 text-primary"></i> Status:</label>
+                            <select id="statusFilter" class="form-select bg-light border-0 fw-bold text-dark cursor-pointer w-100">
+                                <option value="all">Show All</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="completed">Completed</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="admissionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Roll Number</th>
+                                    <th>Student Details</th>
+                                    <th>Course & Target</th>
+                                    <th>Follow-up Info</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enroll in enrollments %}
+                                <tr class="admission-row">
+                                    <td class="fw-bold text-muted" style="letter-spacing: 0.5px;">AKS-2026-{{ "%05d" | format(enroll.id) }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="/static/uploads/students/{{ enroll.student_image }}" class="student-avatar me-3">
+                                            <div>
+                                                <h6 class="fw-bold mb-0 student-name">{{ enroll.student }}</h6>
+                                                <small class="text-muted student-phone"><i class="fas fa-phone-alt me-1"></i>{{ enroll.student_phone }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-primary">{{ enroll.course }}</span><br>
+                                        <div class="fw-bold text-success fs-6 mt-1">₹{{ '{:,}'.format(enroll.amount_paid) }} <span class="small text-muted fw-normal">({{ enroll.payment_plan }})</span></div>
+                                    </td>
+                                    
+                                    <td>
+                                        {% if enroll.next_call_date %}
+                                            <div class="small fw-bold text-danger"><i class="fas fa-calendar-alt me-1"></i> Call: <span class="enroll-call-val">{{ enroll.next_call_date }}</span></div>
+                                        {% else %}
+                                            <div class="small text-muted fst-italic">No follow-up set</div>
+                                        {% endif %}
+                                        
+                                        {% if enroll.message %}
+                                            <div class="small text-muted text-truncate mt-1" style="max-width: 150px;" title="{{ enroll.message }}">{{ enroll.message }}</div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="status-cell">
+                                        {% if enroll.status == 'Pending' %}
+                                            <span class="badge badge-pending px-3 py-2 rounded-pill"><i class="fas fa-clock me-1"></i> Pending</span>
+                                        {% elif enroll.status == 'Approved' %}
+                                            <span class="badge badge-approved px-3 py-2 rounded-pill"><i class="fas fa-check me-1"></i> Approved</span>
+                                        {% elif enroll.status == 'Completed' %}
+                                            <span class="badge bg-info text-white px-3 py-2 rounded-pill border border-info"><i class="fas fa-graduation-cap me-1"></i> Completed</span>
+                                        {% else %}
+                                            <span class="badge badge-rejected px-3 py-2 rounded-pill"><i class="fas fa-times me-1"></i> Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-info rounded-pill fw-bold text-dark px-3 me-1" data-bs-toggle="modal" data-bs-target="#enrollModal{{ enroll.id }}" title="Follow-up Notes">
+                                            <i class="fas fa-edit"></i> Note
+                                        </button>
+                                        <a href="/admin/preview/{{ enroll.id }}" class="btn btn-sm btn-primary rounded-pill fw-bold px-3 me-1" title="View Full App">
+                                            View <i class="fas fa-eye ms-1"></i>
+                                        </a>
+                                        {% if session.get('admin_logged_in') %}
+                                        <a href="/admin/delete_enrollment/{{ enroll.id }}" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('Delete this record?');">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="enrollModal{{ enroll.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow-lg rounded-4">
+                                            <div class="modal-header bg-light border-0">
+                                                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-user-graduate text-primary me-2"></i>Admission Follow-up: {{ enroll.student }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-4 text-start">
+                                                <form action="/admin/enrollment/update/{{ enroll.id }}" method="POST">
+                                                    <div class="mb-4">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase"><i class="fas fa-history me-1"></i> Interaction History</label>
+                                                        <div class="p-3 bg-light border border-secondary border-opacity-25 rounded-3" style="max-height: 150px; overflow-y: auto; font-size: 0.85rem; white-space: pre-wrap; font-family: monospace;">{% if enroll.message %}{{ enroll.message }}{% else %}<span class="text-muted fst-italic">No previous notes recorded.</span>{% endif %}</div>
+                                                    </div>
+                                                    <h6 class="fw-bold text-primary mb-3">Add New Interaction</h6>
+                                                    <div class="row g-3 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Today's Call Date</label>
+                                                            <input type="date" class="form-control bg-light" name="last_call_date" value="{{ enroll.last_call_date or '' }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Schedule Next Call</label>
+                                                            <input type="date" class="form-control bg-light" name="next_call_date" value="{{ enroll.next_call_date or '' }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-4">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase">Counselor Notes</label>
+                                                        <textarea class="form-control bg-light" name="new_message" rows="2" placeholder="E.g. Called for fee reminder..."></textarea>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill shadow-sm py-2">Save Interaction</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <tr id="noDataRow"><td colspan="6" class="text-center py-5 text-muted">No course admissions yet.</td></tr>
+                                {% endfor %}
+                                <tr id="noResultsRow" style="display: none;"><td colspan="6" class="text-center py-5 text-danger fw-bold"><i class="fas fa-search me-2"></i>No students match your search/filter criteria.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="enquiries">
+                <div class="search-filter-wrapper row mx-0 g-3 align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm border border-light">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-warning"><i class="fas fa-search"></i></span>
+                            <input type="text" id="enquirySearch" class="form-control bg-light border-0 fw-bold text-dark" placeholder="Search by Name, Phone, Course...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-danger"><i class="fas fa-calendar-alt"></i>&nbsp; Next Call</span>
+                            <input type="date" id="enquiryDateFilter" class="form-control bg-light border-0 fw-bold text-dark">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="fw-bold text-muted small text-uppercase mb-0 text-nowrap"><i class="fas fa-filter me-1 text-warning"></i> Status:</label>
+                            <select id="enquiryStatusFilter" class="form-select bg-light border-0 fw-bold text-dark cursor-pointer">
+                                <option value="all">Show All</option>
+                                <option value="needs callback">Needs Callback (Pending)</option>
+                                <option value="resolved">Resolved / Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="enquiriesTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Student Name</th>
+                                    <th>Contact Info</th>
+                                    <th>Course Interest</th>
+                                    <th>Follow-up Info</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enq in enquiries %}
+                                <tr class="enquiry-row">
+                                    <td class="text-muted small fw-bold">{{ enq.date_submitted }}</td>
+                                    <td class="fw-bold text-dark">{{ enq.name }}</td>
+                                    <td>
+                                        <div class="small fw-bold"><i class="fas fa-phone text-success me-1"></i> {{ enq.phone }}</div>
+                                        <div class="small text-muted">{{ enq.email }}</div>
+                                    </td>
+                                    <td class="text-primary fw-bold">{{ enq.course_interest }}</td>
+                                    
+                                    <td>
+                                        {% if enq.next_call_date %}
+                                            <div class="small fw-bold text-danger"><i class="fas fa-calendar-alt me-1"></i> Next Call: <span class="next-call-val">{{ enq.next_call_date }}</span></div>
+                                        {% else %}
+                                            <div class="small text-muted fst-italic">No follow-up scheduled</div>
+                                        {% endif %}
+                                        
+                                        {% if enq.message %}
+                                            <div class="small text-muted text-truncate mt-1" style="max-width: 180px;" title="{{ enq.message }}">{{ enq.message }}</div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="enq-status-cell">
+                                        {% if enq.status == 'Pending' %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2 py-1">Needs Callback</span>
+                                        {% else %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1">Resolved</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold me-1" data-bs-toggle="modal" data-bs-target="#enqModal{{ enq.id }}">
+                                            <i class="fas fa-edit"></i> Update
+                                        </button>
+                                        
+                                        {% if session.get('admin_logged_in') %}
+                                        <a href="/admin/enquiry/delete/{{ enq.id }}" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('Delete this enquiry?');"><i class="fas fa-trash-alt"></i></a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="enqModal{{ enq.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow-lg rounded-4">
+                                            <div class="modal-header bg-light border-0">
+                                                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-phone-alt text-primary me-2"></i>Update Enquiry: {{ enq.name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-4 text-start">
+                                                <form action="/admin/enquiry/update/{{ enq.id }}" method="POST">
+                                                    <div class="mb-4">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase"><i class="fas fa-history me-1"></i> Conversation History</label>
+                                                        <div class="p-3 bg-light border border-secondary border-opacity-25 rounded-3" style="max-height: 150px; overflow-y: auto; font-size: 0.85rem; white-space: pre-wrap; font-family: monospace;">{% if enq.message %}{{ enq.message }}{% else %}<span class="text-muted fst-italic">No previous notes recorded.</span>{% endif %}</div>
+                                                    </div>
+                                                    <hr class="opacity-25 my-4">
+                                                    <h6 class="fw-bold text-primary mb-3">Add New Interaction</h6>
+                                                    <div class="row g-3 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Today's Call Date</label>
+                                                            <input type="date" class="form-control bg-light" name="last_call_date" value="{{ enq.last_call_date or '' }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Schedule Next Call</label>
+                                                            <input type="date" class="form-control bg-light" name="next_call_date" value="{{ enq.next_call_date or '' }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase">Counselor Notes</label>
+                                                        <textarea class="form-control bg-light" name="new_message" rows="2" placeholder="Type new details here to append to history..."></textarea>
+                                                    </div>
+                                                    <div class="mb-4">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase">Status</label>
+                                                        <select class="form-select bg-light" name="status">
+                                                            <option value="Pending" {% if enq.status == 'Pending' %}selected{% endif %}>Needs Callback (Pending)</option>
+                                                            <option value="Resolved" {% if enq.status == 'Resolved' %}selected{% endif %}>Resolved / Closed</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill shadow-sm py-2">Save Interaction</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <tr id="enqNoDataRow"><td colspan="7" class="text-center py-5 text-muted">No pending enquiries.</td></tr>
+                                {% endfor %}
+                                <tr id="enqNoResultsRow" style="display: none;"><td colspan="7" class="text-center py-5 text-danger fw-bold"><i class="fas fa-search me-2"></i>No enquiries match your search/filter criteria.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="sat_apps">
+                
+                <div class="search-filter-wrapper row mx-0 g-3 align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm border border-light">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-warning"><i class="fas fa-search"></i></span>
+                            <input type="text" id="satSearch" class="form-control bg-light border-0 fw-bold text-dark" placeholder="Search SAT applicant, phone, batch...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-danger"><i class="fas fa-calendar-alt"></i>&nbsp; Next Call</span>
+                            <input type="date" id="satDateFilter" class="form-control bg-light border-0 fw-bold text-dark">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="fw-bold text-muted small text-uppercase mb-0 text-nowrap"><i class="fas fa-filter me-1 text-warning"></i> Status:</label>
+                            <select id="satStatusFilter" class="form-select bg-light border-0 fw-bold text-dark cursor-pointer">
+                                <option value="all">Show All Apps</option>
+                                <option value="pending">Needs Action (Pending)</option>
+                                <option value="contacted">Contacted / Resolved</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="satTable">
+                            <thead>
+                                <tr>
+                                    <th>Date Applied</th>
+                                    <th>Applicant Name</th>
+                                    <th>Contact Details</th>
+                                    <th>Target Batch</th>
+                                    <th>Follow-up Info</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sat in sat_apps %}
+                                <tr class="sat-row">
+                                    <td class="text-muted small fw-bold">{{ sat.date_applied }}</td>
+                                    <td class="fw-bold text-dark">{{ sat.name }}</td>
+                                    <td>
+                                        <div class="small fw-bold"><i class="fas fa-phone text-success me-1"></i> {{ sat.phone }}</div>
+                                        <div class="small text-muted">{{ sat.email }}</div>
+                                    </td>
+                                    <td class="text-warning fw-bold">{{ sat.batch }}</td>
+                                    
+                                    <td>
+                                        {% if sat.next_call_date %}
+                                            <div class="small fw-bold text-danger"><i class="fas fa-calendar-alt me-1"></i> Next Call: <span class="sat-call-val">{{ sat.next_call_date }}</span></div>
+                                        {% else %}
+                                            <div class="small text-muted fst-italic">No follow-up scheduled</div>
+                                        {% endif %}
+                                        
+                                        {% if sat.message %}
+                                            <div class="small text-muted text-truncate mt-1" style="max-width: 150px;" title="{{ sat.message }}">{{ sat.message }}</div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="sat-status-cell">
+                                        {% if sat.status == 'Pending' %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2 py-1">Pending</span>
+                                        {% else %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1">Contacted</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold me-1" data-bs-toggle="modal" data-bs-target="#satModal{{ sat.id }}">
+                                            Preview & Update <i class="fas fa-chevron-right ms-1"></i>
+                                        </button>
+                                        
+                                        {% if session.get('admin_logged_in') %}
+                                            <a href="/admin/sat/delete/{{ sat.id }}" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('Delete this SAT application?');"><i class="fas fa-trash-alt"></i></a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="satModal{{ sat.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                        <div class="modal-content border-0 shadow-lg rounded-4">
+                                            <div class="modal-header bg-light border-0">
+                                                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-star text-warning me-2"></i>AKS-SAT Applicant Preview</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-4 text-start">
+                                                
+                                                <div class="bg-white p-4 border rounded-3 mb-4 shadow-sm border-warning border-start border-4">
+                                                    <div class="row">
+                                                        <div class="col-sm-6 mb-3">
+                                                            <p class="small text-muted mb-1 text-uppercase fw-bold">Applicant Name</p>
+                                                            <h5 class="fw-bold text-dark mb-0">{{ sat.name }}</h5>
+                                                        </div>
+                                                        <div class="col-sm-6 mb-3">
+                                                            <p class="small text-muted mb-1 text-uppercase fw-bold">Target Exam/Batch</p>
+                                                            <h5 class="fw-bold text-primary mb-0">{{ sat.batch }}</h5>
+                                                        </div>
+                                                        <div class="col-sm-6 mb-3">
+                                                            <p class="small text-muted mb-1 text-uppercase fw-bold">Phone Number</p>
+                                                            <p class="fw-bold text-dark mb-0"><i class="fas fa-phone-alt text-success me-1"></i> {{ sat.phone }}</p>
+                                                        </div>
+                                                        <div class="col-sm-6 mb-3">
+                                                            <p class="small text-muted mb-1 text-uppercase fw-bold">Email Address</p>
+                                                            <p class="fw-bold text-dark mb-0">{{ sat.email }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <form action="/admin/sat/update/{{ sat.id }}" method="POST">
+                                                    <div class="mb-4">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase"><i class="fas fa-history me-1"></i> Follow-up History</label>
+                                                        <div class="p-3 bg-light border border-secondary border-opacity-25 rounded-3" style="max-height: 150px; overflow-y: auto; font-size: 0.85rem; white-space: pre-wrap; font-family: monospace;">{% if sat.message %}{{ sat.message }}{% else %}<span class="text-muted fst-italic">No previous notes recorded.</span>{% endif %}</div>
+                                                    </div>
+                                                    <h6 class="fw-bold text-primary mb-3">Add New Interaction</h6>
+                                                    <div class="row g-3 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Today's Call Date</label>
+                                                            <input type="date" class="form-control bg-light" name="last_call_date" value="{{ sat.last_call_date or '' }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Schedule Next Call</label>
+                                                            <input type="date" class="form-control bg-light" name="next_call_date" value="{{ sat.next_call_date or '' }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase">Counselor Notes / Message</label>
+                                                        <textarea class="form-control bg-light" name="new_message" rows="2" placeholder="E.g. Sent SAT exam link..."></textarea>
+                                                    </div>
+                                                    <div class="mb-4">
+                                                        <label class="form-label small fw-bold text-muted text-uppercase">Status</label>
+                                                        <select class="form-select bg-light" name="status">
+                                                            <option value="Pending" {% if sat.status == 'Pending' %}selected{% endif %}>Needs Action (Pending)</option>
+                                                            <option value="Contacted" {% if sat.status == 'Contacted' %}selected{% endif %}>Contacted / Resolved</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill shadow-sm py-2">Save SAT Interaction</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <tr id="satNoDataRow"><td colspan="7" class="text-center py-5 text-muted">No AKS-SAT applications yet.</td></tr>
+                                {% endfor %}
+                                <tr id="satNoResultsRow" style="display: none;"><td colspan="7" class="text-center py-5 text-danger fw-bold"><i class="fas fa-search me-2"></i>No SAT applications match your search criteria.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="materials">
+                <div class="admin-card p-4 border-start border-primary border-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-4"><i class="fas fa-file-upload me-2"></i>Upload New Study Material</h5>
+                    <form action="/admin/upload_material" method="POST" enctype="multipart/form-data" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Document Title</label>
+                            <input type="text" name="title" class="form-control bg-light" placeholder="e.g. Chapter 1 Physics Notes" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Assign to Batch</label>
+                            <select name="batch" class="form-select bg-light" required>
+                                <option value="All Batches">Access for ALL Batches</option>
+                                {% for c in courses %}
+                                    <option value="{{ c.name }}">{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Attach PDF</label>
+                            <input type="file" name="material_file" accept=".pdf" class="form-control bg-light" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Upload <i class="fas fa-upload ms-1"></i></button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Document Title</th>
+                                    <th>Assigned Batch</th>
+                                    <th>Upload Date</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if materials %}
+                                    {% for mat in materials %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-dark"><i class="fas fa-file-pdf text-danger me-2"></i> {{ mat.title }}</td>
+                                        <td>
+                                            {% if mat.batch == 'All Batches' %}
+                                                <span class="badge bg-primary px-2 rounded-pill">All Batches</span>
+                                            {% else %}
+                                                <span class="text-muted fw-bold">{{ mat.batch }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-muted small">{{ mat.upload_date }}</td>
+                                        <td class="text-end pe-4">
+                                            <a href="/static/uploads/materials/{{ mat.filename }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold me-1"><i class="fas fa-eye me-1"></i> View</a>
+                                            
+                                            {% if session.get('admin_logged_in') %}
+                                            <a href="/admin/material/delete/{{ mat.id }}" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold" onclick="return confirm('Delete this study material permanently?');"><i class="fas fa-trash-alt me-1"></i> Delete</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr><td colspan="4" class="text-center py-5 text-muted">No study materials uploaded yet.</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="progress">
+                
+                <div class="search-filter-wrapper d-flex align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm border border-light">
+                    <div class="input-group w-100">
+                        <span class="input-group-text bg-light border-0 text-success"><i class="fas fa-search"></i></span>
+                        <input type="text" id="progressSearch" class="form-control bg-light border-0 fw-bold text-dark" placeholder="Search by Student Name or Report Title...">
+                    </div>
+                </div>
+
+                <div class="admin-card p-4 border-start border-success border-4 mb-4">
+                    <h5 class="fw-bold text-success mb-4"><i class="fas fa-upload me-2"></i>Upload Student Progress Report</h5>
+                    <form action="/admin/upload_progress" method="POST" enctype="multipart/form-data" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Select Student</label>
+                            <select name="user_id" class="form-select bg-light" required>
+                                <option value="">-- Choose Student --</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.name }} ({{ user.email }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Report Title</label>
+                            <input type="text" name="title" class="form-control bg-light" placeholder="e.g. Term 1 Results" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Attach File (PDF/Img)</label>
+                            <input type="file" name="report_file" class="form-control bg-light" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-success w-100 fw-bold">Upload <i class="fas fa-cloud-upload-alt ms-1"></i></button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="progressTable">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">ID</th>
+                                    <th>Student Name</th>
+                                    <th>Report Title</th>
+                                    <th>Upload Date</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if reports %}
+                                    {% for report in reports %}
+                                    <tr class="progress-row">
+                                        <td class="ps-4 fw-bold text-muted">#{{ report.id }}</td>
+                                        <td class="fw-bold text-dark">
+                                            {% for user in users %}
+                                                {% if user.id == report.user_id %}{{ user.name }}{% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ report.title }}</td>
+                                        <td>{{ report.upload_date }}</td>
+                                        <td class="text-end pe-4">
+                                            <a href="/static/uploads/progress/{{ report.filename }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold me-1"><i class="fas fa-eye me-1"></i> View</a>
+                                            
+                                            {% if session.get('admin_logged_in') %}
+                                            <a href="/admin/progress/delete/{{ report.id }}" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold" onclick="return confirm('Delete this report?');"><i class="fas fa-trash-alt me-1"></i> Delete</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr id="progNoResultsRow" style="display: none;"><td colspan="5" class="text-center py-5 text-danger fw-bold"><i class="fas fa-search me-2"></i>No reports match your search criteria.</td></tr>
+                                {% else %}
+                                    <tr id="progNoDataRow"><td colspan="5" class="text-center py-5 text-muted">No progress reports uploaded yet.</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="gallery">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="admin-card p-4 h-100">
+                            <h5 class="fw-bold text-dark mb-4"><i class="fas fa-cloud-upload-alt text-info me-2"></i>Add New Slides</h5>
+                            <form action="/admin/gallery/upload" method="POST" enctype="multipart/form-data">
+                                <div class="mb-4">
+                                    <label class="form-label small fw-bold">Select Images (Max 15 total)</label>
+                                    <input type="file" class="form-control" name="gallery_images" accept="image/*" multiple required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">Upload Images to Homepage</button>
+                            </form>
+                            <p class="text-muted small mt-3"><i class="fas fa-info-circle me-1"></i> You can select multiple images at once.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="admin-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Image Preview</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for slide in slides %}
+                                        <tr>
+                                            <td>
+                                                <img src="/static/uploads/gallery/{{ slide.filename }}" class="gallery-thumb" alt="Slide">
+                                            </td>
+                                            <td class="text-end align-middle">
+                                                {% if session.get('admin_logged_in') %}
+                                                <a href="/admin/gallery/delete/{{ slide.id }}" class="btn btn-sm btn-outline-danger rounded-pill px-4 fw-bold" onclick="return confirm('Remove this image from the homepage?');">
+                                                    <i class="fas fa-trash-alt me-1"></i> Delete
+                                                </a>
+                                                {% else %}
+                                                    <span class="text-muted small">Admin Only</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="2" class="text-center py-5 text-muted">No images in slider yet.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="users">
+                
+                {% if session.get('admin_logged_in') %}
+                <div class="admin-card p-4 mb-4 border-start border-warning border-4 shadow-sm bg-white">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-user-shield text-warning me-2"></i>Staff Portal Access Control</h5>
+                    <p class="small text-muted mb-4">Change the master credentials for your office staff here. If you change this, your staff will need the new credentials to log back in.</p>
+                    
+                    <form action="/admin/update_staff" method="POST" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase"><i class="fas fa-user text-primary me-1"></i> Staff Username / Email</label>
+                            <input type="text" class="form-control bg-light border-0 fw-bold" name="new_staff_user" value="{{ staff_acct.username if staff_acct else 'staff' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase"><i class="fas fa-key text-primary me-1"></i> Staff Password</label>
+                            <input type="text" class="form-control bg-light border-0 fw-bold text-danger" name="new_staff_pass" value="{{ staff_acct.password if staff_acct else 'aksstaff' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm rounded-pill" onclick="return confirm('Change staff credentials? Be sure to write them down!');">
+                                Update Credentials <i class="fas fa-save ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                <div class="admin-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email Address</th>
+                                    <th>Phone Number</th>
+                                    <th>Account Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users|reverse %}
+                                <tr>
+                                    <td class="fw-bold text-muted">UID-{{ user.id }}</td>
+                                    <td class="fw-bold">{{ user.name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone }}</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-1 rounded-pill">Active</span></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted">No users registered yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // 1. COURSE ADMISSIONS SEARCH & FILTER
+            const adminSearchInput = document.getElementById('studentSearch');
+            const enrollDateFilter = document.getElementById('enrollDateFilter'); // ADDED: Admission Date Filter
+            const adminStatusFilter = document.getElementById('statusFilter');
+            const adminTableRows = document.querySelectorAll('#admissionsTable tbody .admission-row');
+            const adminNoResultsRow = document.getElementById('noResultsRow');
+
+            function filterAdmissions() {
+                const searchTerm = adminSearchInput.value.toLowerCase();
+                const dateTerm = enrollDateFilter.value; // ADDED: Read Date
+                const statusTerm = adminStatusFilter.value.toLowerCase();
+                let visibleCount = 0;
+
+                adminTableRows.forEach(row => {
+                    const rowText = row.innerText.toLowerCase();
+                    const statusCellText = row.querySelector('.status-cell').innerText.toLowerCase();
+                    
+                    // ADDED: Extract the Date
+                    let rowDate = "";
+                    const dateElem = row.querySelector('.enroll-call-val');
+                    if(dateElem) {
+                        rowDate = dateElem.innerText.trim();
+                    }
+
+                    const matchesSearch = rowText.includes(searchTerm);
+                    const matchesStatus = (statusTerm === 'all') || statusCellText.includes(statusTerm);
+                    const matchesDate = (!dateTerm) || (rowDate === dateTerm); // ADDED: Check Date Match
+
+                    // MODIFIED: Ensure all three criteria pass
+                    if (matchesSearch && matchesStatus && matchesDate) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0 && adminTableRows.length > 0) {
+                    adminNoResultsRow.style.display = '';
+                } else if (adminNoResultsRow) {
+                    adminNoResultsRow.style.display = 'none';
+                }
+            }
+
+            if (adminSearchInput && adminStatusFilter && enrollDateFilter) {
+                adminSearchInput.addEventListener('input', filterAdmissions);
+                adminStatusFilter.addEventListener('change', filterAdmissions);
+                enrollDateFilter.addEventListener('change', filterAdmissions); // ADDED: Listen for Date Change
+            }
+
+            // 2. ENQUIRIES SEARCH & FILTER
+            const enqSearchInput = document.getElementById('enquirySearch');
+            const enqDateFilter = document.getElementById('enquiryDateFilter');
+            const enqStatusFilter = document.getElementById('enquiryStatusFilter');
+            const enqTableRows = document.querySelectorAll('#enquiriesTable tbody .enquiry-row');
+            const enqNoResultsRow = document.getElementById('enqNoResultsRow');
+
+            function filterEnquiries() {
+                const searchTerm = enqSearchInput.value.toLowerCase();
+                const dateTerm = enqDateFilter.value; 
+                const statusTerm = enqStatusFilter.value.toLowerCase();
+                let visibleCount = 0;
+
+                enqTableRows.forEach(row => {
+                    const rowText = row.innerText.toLowerCase();
+                    const statusCellText = row.querySelector('.enq-status-cell').innerText.toLowerCase();
+                    
+                    let rowDate = "";
+                    const dateElem = row.querySelector('.next-call-val');
+                    if(dateElem) {
+                        rowDate = dateElem.innerText.trim();
+                    }
+                    
+                    const matchesSearch = rowText.includes(searchTerm);
+                    const matchesStatus = (statusTerm === 'all') || statusCellText.includes(statusTerm);
+                    const matchesDate = (!dateTerm) || (rowDate === dateTerm);
+
+                    if (matchesSearch && matchesStatus && matchesDate) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0 && enqTableRows.length > 0) {
+                    enqNoResultsRow.style.display = '';
+                } else if (enqNoResultsRow) {
+                    enqNoResultsRow.style.display = 'none';
+                }
+            }
+
+            if (enqSearchInput && enqStatusFilter && enqDateFilter) {
+                enqSearchInput.addEventListener('input', filterEnquiries);
+                enqStatusFilter.addEventListener('change', filterEnquiries);
+                enqDateFilter.addEventListener('change', filterEnquiries);
+            }
+
+            // 3. AKS-SAT APPS SEARCH & FILTER
+            const satSearchInput = document.getElementById('satSearch');
+            const satDateFilter = document.getElementById('satDateFilter');
+            const satStatusFilter = document.getElementById('satStatusFilter');
+            const satTableRows = document.querySelectorAll('#satTable tbody .sat-row');
+            const satNoResultsRow = document.getElementById('satNoResultsRow');
+
+            function filterSatApps() {
+                const searchTerm = satSearchInput.value.toLowerCase();
+                const dateTerm = satDateFilter.value; 
+                const statusTerm = satStatusFilter.value.toLowerCase();
+                let visibleCount = 0;
+
+                satTableRows.forEach(row => {
+                    const rowText = row.innerText.toLowerCase();
+                    const statusCellText = row.querySelector('.sat-status-cell').innerText.toLowerCase();
+                    
+                    let rowDate = "";
+                    const dateElem = row.querySelector('.sat-call-val');
+                    if(dateElem) {
+                        rowDate = dateElem.innerText.trim();
+                    }
+                    
+                    const matchesSearch = rowText.includes(searchTerm);
+                    const matchesStatus = (statusTerm === 'all') || statusCellText.includes(statusTerm);
+                    const matchesDate = (!dateTerm) || (rowDate === dateTerm);
+
+                    if (matchesSearch && matchesStatus && matchesDate) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0 && satTableRows.length > 0) {
+                    satNoResultsRow.style.display = '';
+                } else if (satNoResultsRow) {
+                    satNoResultsRow.style.display = 'none';
+                }
+            }
+
+            if (satSearchInput && satStatusFilter && satDateFilter) {
+                satSearchInput.addEventListener('input', filterSatApps);
+                satStatusFilter.addEventListener('change', filterSatApps);
+                satDateFilter.addEventListener('change', filterSatApps);
+            }
+
+            // 4. PROGRESS REPORTS SEARCH
+            const progSearchInput = document.getElementById('progressSearch');
+            const progTableRows = document.querySelectorAll('#progressTable tbody .progress-row');
+            const progNoResultsRow = document.getElementById('progNoResultsRow');
+
+            function filterProgress() {
+                const searchTerm = progSearchInput.value.toLowerCase();
+                let visibleCount = 0;
+
+                progTableRows.forEach(row => {
+                    const rowText = row.innerText.toLowerCase();
+                    if (rowText.includes(searchTerm)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0 && progTableRows.length > 0) {
+                    progNoResultsRow.style.display = '';
+                } else if (progNoResultsRow) {
+                    progNoResultsRow.style.display = 'none';
+                }
+            }
+
+            if (progSearchInput) {
+                progSearchInput.addEventListener('input', filterProgress);
+            }
+
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
