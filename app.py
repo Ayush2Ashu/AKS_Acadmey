@@ -777,4 +777,4 @@ if __name__ == '__main__':
             hashed_default = generate_password_hash("aksstaff")
             db.session.add(StaffAccount(username="staff", password=hashed_default))
             db.session.commit()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
