@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
 import random
 import os
 import io
@@ -13,27 +12,19 @@ import base64
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = "aks_academy_secure_key_2026"
 
 # ==========================================
-# PRODUCTION-READY CONFIGURATION
-# (Pulls from server environment, with local fallbacks)
+# BULLETPROOF GMAIL SSL CONFIGURATION
 # ==========================================
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "aks_academy_secure_key_2026")
-
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME", "aksacademyranchi@gmail.com")      
-app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD", "cjqwvbdzpqpqseok")  
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get("MAIL_USERNAME", "aksacademyranchi@gmail.com")
+app.config['MAIL_USERNAME'] = 'aksacademyranchi@gmail.com'      
+app.config['MAIL_PASSWORD'] = 'cjqwvbdzpqpqseok'  
+app.config['MAIL_DEFAULT_SENDER'] = 'aksacademyranchi@gmail.com'
 mail = Mail(app)
-
-# ==========================================
-# CONSTANTS & DATA
-# ==========================================
-ADMIN_USER = os.environ.get("AKS_ADMIN_USER", "admin")
-ADMIN_PASS = os.environ.get("AKS_ADMIN_PASS", "aks123")
 
 def get_absolute_path(uri, rel):
     if uri.startswith('static/'):
@@ -63,12 +54,12 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     phone = db.Column(db.String(20), nullable=False)
-    password = db.Column(db.String(255), nullable=False) # Expanded size for hashes
+    password = db.Column(db.String(100), nullable=False)
 
 class StaffAccount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, default="staff")
-    password = db.Column(db.String(255), nullable=False) # Expanded size for hashes
+    password = db.Column(db.String(100), nullable=False, default="aksstaff")
 
 class StudyMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -154,14 +145,20 @@ class Enquiry(db.Model):
     message = db.Column(db.Text)
     next_call_date = db.Column(db.String(20))
 
+# ==========================================
+# CONSTANTS & DATA
+# ==========================================
+ADMIN_USER = "admin"
+ADMIN_PASS = "aks123"
+
 COURSE_DATA = [
     {"id": "pre-found-9", "category": "Pre-Foundation", "name": "Pre-Foundation (Class 9)", "price": 25000, "img": "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=400", "desc": "Building strong logic, mathematics, and core science concepts early.", "tag": "Early Start", "duration": "1 Year"},
     {"id": "pre-found-10", "category": "Pre-Foundation", "name": "Pre-Foundation (Class 10)", "price": 25000, "img": "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=400", "desc": "Focused board exam preparation for Class 10 students.", "tag": "Board Prep", "duration": "1 Year"},
     {"id": "pre-found-9-10", "category": "Pre-Foundation", "name": "Pre-Foundation (Class 9 & 10)", "price": 50000, "img": "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=400", "desc": "Comprehensive 2-year integrated program.", "tag": "Integrated", "duration": "2 Years"},
-    {"id": "found-11", "category": "Foundation", "name": "Foundation (Class 11)", "price": 45500, "img": "/static/images/boards.jpg", "desc": "Solidifying Class 11 concepts crucial for board exams.", "tag": "Core Base", "duration": "1 Year"},
-    {"id": "found-12", "category": "Foundation", "name": "Foundation (Class 12)", "price": 45500, "img": "/static/images/boards.jpg", "desc": "Intensive Class 12 board focus to maximize your percentage.", "tag": "Board Prep", "duration": "1 Year"},
-    {"id": "found-11-12", "category": "Foundation", "name": "Foundation (Class 11 & 12)", "price": 91000, "img": "/static/images/boards.jpg", "desc": "Comprehensive board exam preparation synchronized with entrance training.", "tag": "Integrated", "duration": "2 Years"},
-    {"id": "target-jee", "category": "Target", "name": "Target Batch (JEE)", "price": 65000, "img": "/static/images/jee.jpg", "desc": "Intensive Full PCM Syllabus training specifically for JEE Mains & Advanced.", "tag": "Engineering", "duration": "1 Year"},
+    {"id": "found-11", "category": "Foundation", "name": "Foundation (Class 11)", "price": 45500, "img": "/static/images/Boards.jpg", "desc": "Solidifying Class 11 concepts crucial for board exams.", "tag": "Core Base", "duration": "1 Year"},
+    {"id": "found-12", "category": "Foundation", "name": "Foundation (Class 12)", "price": 45500, "img": "/static/images/Boards.jpg", "desc": "Intensive Class 12 board focus to maximize your percentage.", "tag": "Board Prep", "duration": "1 Year"},
+    {"id": "found-11-12", "category": "Foundation", "name": "Foundation (Class 11 & 12)", "price": 91000, "img": "/static/images/Boards.jpg", "desc": "Comprehensive board exam preparation synchronized with entrance training.", "tag": "Integrated", "duration": "2 Years"},
+    {"id": "target-jee", "category": "Target", "name": "Target Batch (JEE)", "price": 65000, "img": "/static/images/Jee.jpg", "desc": "Intensive Full PCM Syllabus training specifically for JEE Mains & Advanced.", "tag": "Engineering", "duration": "1 Year"},
     {"id": "target-neet", "category": "Target", "name": "Target Batch (NEET)", "price": 65000, "img": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=400", "desc": "Rigorous Biology, Physics, and Chemistry training targeting top medical colleges.", "tag": "Medical", "duration": "1 Year"},
     {"id": "target-nda", "category": "Target", "name": "Target Batch (NDA)", "price": 65000, "img": "https://pcprd.azureedge.net/content/1db86efa68b0.jpg", "desc": "Dedicated Defense entrance training with strategic math and general ability guidance.", "tag": "Defense", "duration": "6 Months"}
 ]
@@ -383,6 +380,7 @@ def collect_fee(enroll_id):
     else:
         emi_amount = enroll.payable_fee
 
+    # 1. Update the Database
     if payment_type == 'installment':
         enroll.amount_paid += emi_amount
         if enroll.amount_paid > enroll.payable_fee:
@@ -395,6 +393,7 @@ def collect_fee(enroll_id):
         
     db.session.commit()
 
+    # 2. Automate the Email to the Student
     try:
         pdf_file = generate_admission_pdf(enroll)
         msg = Message("Payment Received - AKS Academy", recipients=[enroll.student_email])
@@ -403,6 +402,7 @@ def collect_fee(enroll_id):
         mail.send(msg)
         flash(base_msg + " Updated receipt was emailed to the student automatically.", "success")
     except Exception as e:
+        print(f"\n❌ PAYMENT EMAIL ERROR: {str(e)}\n")
         flash(base_msg + " (Warning: Database updated, but the email failed to send.)", "warning")
 
     return redirect(url_for('admin_preview', enroll_id=enroll.id))
@@ -497,13 +497,10 @@ def update_staff():
     if not staff_acct:
         staff_acct = StaffAccount()
         db.session.add(staff_acct)
-    
-    # NEW: Secure Password Hashing
     staff_acct.username = request.form.get('new_staff_user')
-    staff_acct.password = generate_password_hash(request.form.get('new_staff_pass'))
+    staff_acct.password = request.form.get('new_staff_pass')
     db.session.commit()
-    
-    flash("Staff Portal credentials have been successfully updated and secured!", "success")
+    flash("Staff Portal credentials have been successfully updated!", "success")
     return redirect(url_for('admin'))
 
 @app.route('/admin/apply_discount/<int:enroll_id>', methods=['POST'])
@@ -642,23 +639,92 @@ def delete_sat(sat_id):
     flash("SAT Application deleted.", "dark")
     return redirect(url_for('admin'))
 
+
 # ==========================================
-# REGISTRATION & SECURE LOGIN
+# OPEN ACTIONS (Admin & Staff)
 # ==========================================
+@app.route('/admin/gallery/upload', methods=['POST'])
+def upload_gallery():
+    if not (session.get('admin_logged_in') or session.get('staff_logged_in')): return redirect(url_for('login'))
+    current_count = Gallery.query.count()
+    uploaded_files = request.files.getlist('gallery_images')
+    if not uploaded_files or uploaded_files[0].filename == '':
+        flash("Please select at least one image.", "danger")
+        return redirect(url_for('admin'))
+    added_count = 0
+    for image_file in uploaded_files:
+        if current_count + added_count >= 15:
+            flash(f"Limit of 15 reached! Only {added_count} images were added.", "warning")
+            break
+        if image_file and image_file.filename:
+            filename = secure_filename(f"slide_{random.randint(1000,9999)}_{image_file.filename}")
+            image_file.save(os.path.join(app.config['GALLERY_FOLDER'], filename))
+            new_slide = Gallery(filename=filename)
+            db.session.add(new_slide)
+            added_count += 1
+    if added_count > 0:
+        db.session.commit()
+        flash(f"{added_count} new slide(s) added successfully!", "success")
+    return redirect(url_for('admin'))
+
+@app.route('/admin/upload_progress', methods=['POST'])
+def upload_progress():
+    if not (session.get('admin_logged_in') or session.get('staff_logged_in')): return redirect(url_for('login'))
+    user_id = request.form.get('user_id')
+    title = request.form.get('title')
+    report_file = request.files.get('report_file')
+    if not user_id or not title:
+        flash("User and Title are required.", "danger")
+        return redirect(url_for('admin'))
+    if report_file and report_file.filename:
+        filename = secure_filename(f"progress_{user_id}_{random.randint(1000,9999)}_{report_file.filename}")
+        report_file.save(os.path.join(app.config['PROGRESS_FOLDER'], filename))
+        new_report = ProgressReport(user_id=user_id, title=title, filename=filename)
+        db.session.add(new_report)
+        db.session.commit()
+        flash("Progress report uploaded successfully!", "success")
+    else:
+        flash("Please attach a valid file.", "danger")
+    return redirect(url_for('admin'))
+
+@app.route('/admin/enquiry/update/<int:enq_id>', methods=['POST'])
+def update_enquiry(enq_id):
+    if not (session.get('admin_logged_in') or session.get('staff_logged_in')): return redirect(url_for('login'))
+    enq = Enquiry.query.get_or_404(enq_id)
+    new_call_date = request.form.get('last_call_date')
+    new_message = request.form.get('new_message') 
+    if new_message and new_message.strip():
+        timestamp = datetime.now().strftime("%d-%b-%Y %I:%M %p")
+        call_info = f" (Called on: {new_call_date})" if new_call_date else ""
+        log_entry = f"➤ [{timestamp}]{call_info}\n{new_message.strip()}"
+        if enq.message:
+            enq.message = enq.message + "\n\n" + log_entry
+        else:
+            enq.message = log_entry
+    enq.last_call_date = new_call_date
+    enq.next_call_date = request.form.get('next_call_date')
+    enq.status = request.form.get('status')
+    db.session.commit()
+    flash("Counselor interaction logged successfully.", "success")
+    return redirect(url_for('admin'))
+
+@app.route('/admin/enquiry/resolve/<int:enq_id>')
+def resolve_enquiry(enq_id):
+    if not (session.get('admin_logged_in') or session.get('staff_logged_in')): return redirect(url_for('login'))
+    enq = Enquiry.query.get_or_404(enq_id)
+    enq.status = "Resolved"
+    db.session.commit()
+    flash("Enquiry marked as resolved.", "success")
+    return redirect(url_for('admin'))
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
-        raw_password = request.form['password']
-        
+        name, email, phone, password = request.form['name'], request.form['email'], request.form['phone'], request.form['password']
         if User.query.filter_by(email=email).first():
             flash("Email already exists!", "danger")
         else:
-            # NEW: Secure Password Hashing
-            hashed_pw = generate_password_hash(raw_password)
-            db.session.add(User(name=name, email=email, phone=phone, password=hashed_pw))
+            db.session.add(User(name=name, email=email, phone=phone, password=password))
             db.session.commit()
             flash("Success! Please Login.", "success")
             return redirect(url_for('login'))
@@ -681,29 +747,23 @@ def login():
         elif l_type == 'staff':
             staff_acct = StaffAccount.query.first()
             current_staff_user = staff_acct.username if staff_acct else "staff"
-            current_staff_pass_hash = staff_acct.password if staff_acct else generate_password_hash("aksstaff")
+            current_staff_pass = staff_acct.password if staff_acct else "aksstaff"
 
-            # Supports logging into older unhashed DB entries gracefully!
-            if email == current_staff_user:
-                if check_password_hash(current_staff_pass_hash, password) or current_staff_pass_hash == password:
-                    session['staff_logged_in'] = True
-                    return redirect(url_for('admin'))
-            flash("Invalid Office Staff credentials", "danger")
+            if email == current_staff_user and password == current_staff_pass:
+                session['staff_logged_in'] = True
+                return redirect(url_for('admin'))
+            else:
+                flash("Invalid Office Staff credentials", "danger")
                 
         else:
             user = User.query.filter_by(email=email).first()
-            # Supports logging into older unhashed student entries gracefully!
-            if user:
-                if check_password_hash(user.password, password) or user.password == password:
-                    session['user'], session['user_id'] = user.name, user.id
-                    return redirect(url_for('dashboard'))
+            if user and user.password == password:
+                session['user'], session['user_id'] = user.name, user.id
+                return redirect(url_for('dashboard'))
             flash("Invalid Student credentials", "danger")
             
     return render_template('login.html')
 
-# ==========================================
-# OTP & ACCOUNT RECOVERY ROUTES
-# ==========================================
 @app.route('/forgot-password')
 def forgot_password():
     session.pop('reset_email', None)
@@ -726,7 +786,7 @@ def request_otp():
         mail.send(msg)
         return redirect(url_for('verify_otp'))
     except Exception as e:
-        flash(f"EMAIL SERVER BLOCKED IT! Check console logs.", "danger")
+        flash(f"EMAIL SERVER BLOCKED IT! The hidden error is: {str(e)}", "danger")
         return redirect(url_for('forgot_password'))
 
 @app.route('/verify-otp', methods=['GET', 'POST'])
@@ -747,8 +807,7 @@ def reset_password():
     if request.method == 'POST':
         user = User.query.filter_by(email=session.get('reset_email')).first()
         if user:
-            # NEW: Securely Hash the reset password
-            user.password = generate_password_hash(request.form.get('new_password'))
+            user.password = request.form.get('new_password')
             db.session.commit()
             session.pop('reset_email', None)
             session.pop('reset_otp', None)
@@ -772,9 +831,7 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        # Initialize default staff securely
         if not StaffAccount.query.first():
-            hashed_default = generate_password_hash("aksstaff")
-            db.session.add(StaffAccount(username="staff", password=hashed_default))
+            db.session.add(StaffAccount(username="staff", password="aksstaff"))
             db.session.commit()
-    app.run(host="0.0.0.0", debug=True)
+    app.run(debug=True)
