@@ -131,6 +131,14 @@
 </head>
 <body>
 
+    <!-- SAFE GLOBAL DATE EXTRACTION: Prevents crash if student paid in full -->
+    {% set day = enroll.admission_date[:2] | int %}
+    {% set suffix = 'th' %}
+    {% if day in [1, 21, 31] %}{% set suffix = 'st' %}
+    {% elif day in [2, 22] %}{% set suffix = 'nd' %}
+    {% elif day in [3, 23] %}{% set suffix = 'rd' %}
+    {% endif %}
+
     <table class="header-table">
         <tr>
             <td class="logo-cell">
@@ -302,7 +310,7 @@
                 {% if emis_left > 0 %}
                     <tr>
                         <td>Next Installment</td>
-                        <td>5th of Next Month</td>
+                        <td>{{ day }}{{ suffix }} of Next Month</td>
                         <td>Rs. {{ '{:,}'.format(fixed_emi if remaining > fixed_emi else remaining) }}</td>
                         <td style="color: #dc3545;">Pending</td>
                     </tr>
@@ -311,7 +319,7 @@
                 {% if emis_left > 1 %}
                     <tr>
                         <td>Remaining Installments</td>
-                        <td>5th of Every Subsequent Month (x{{ emis_left - 1 }})</td>
+                        <td>{{ day }}{{ suffix }} of Every Subsequent Month (x{{ emis_left - 1 }})</td>
                         <td>Rs. {{ '{:,}'.format(fixed_emi) }} each</td>
                         <td style="color: #dc3545;">Pending</td>
                     </tr>
@@ -352,7 +360,7 @@
             <li>This is a computer-generated receipt confirming your admission and fee payment to AKS Academy.</li>
             <li><strong>Refund Policy:</strong> Fees once paid are strictly non-refundable and non-transferable under any circumstances.</li>
             <li><strong>Digital Access:</strong> This receipt grants the student access to the LMS Dashboard, live lectures, and recorded materials.</li>
-            <li><strong>EMI Default:</strong> Failure to pay upcoming installments by the 5th of the month will result in immediate suspension of LMS and classroom access.</li>
+            <li><strong>EMI Default:</strong> Failure to pay upcoming installments by the {{ day }}{{ suffix }} of the month will result in immediate suspension of LMS and classroom access.</li>
         </ul>
     </div>
 
