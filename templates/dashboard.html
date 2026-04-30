@@ -189,13 +189,21 @@
                         {% endif %}
                         {% set next_payment = fixed_emi if outstanding > fixed_emi else outstanding %}
 
+                        <!-- EXTRACTS THE DATE OF ADMISSION AND FORMATS IT AUTOMATICALLY -->
+                        {% set day = enroll.admission_date[:2] | int %}
+                        {% set suffix = 'th' %}
+                        {% if day in [1, 21, 31] %}{% set suffix = 'st' %}
+                        {% elif day in [2, 22] %}{% set suffix = 'nd' %}
+                        {% elif day in [3, 23] %}{% set suffix = 'rd' %}
+                        {% endif %}
+
                         <div class="alert alert-danger bg-white border-danger border-start border-4 shadow-sm p-4 rounded-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
                             <div class="mb-3 mb-md-0">
                                 <h5 class="fw-bold text-danger mb-2"><i class="fas fa-calendar-times me-2"></i> Upcoming EMI Installment Due</h5>
                                 <p class="mb-0 text-muted" style="line-height: 2;">
                                     Your next EMI payment of <strong class="text-danger fw-bold">₹{{ '{:,}'.format(next_payment) }}</strong> for <strong class="text-dark">{{ enroll.course }}</strong> is due on 
-                                    <strong class="text-danger border border-danger rounded-pill px-3 py-1 mx-1 bg-danger bg-opacity-10 emi-due-date">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                    <strong class="text-danger border border-danger rounded-pill px-3 py-1 mx-1 bg-danger bg-opacity-10">
+                                        <i class="fas fa-clock me-1"></i> {{ day }}{{ suffix }} of Next Month
                                     </strong> 
                                 </p>
                             </div>
@@ -234,7 +242,8 @@
                                 </div>
                             </div>
                         </div>
-                        {% endif %}
+
+                    {% endif %}
                 {% endif %}
             {% endfor %}
 
@@ -303,6 +312,7 @@
                             </div>
                         </div>
 
+                        <!-- STUDY MATERIALS MODAL FOR THIS SPECIFIC COURSE -->
                         <div class="modal fade" id="materialsModal{{ enroll.id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content border-0 shadow-lg rounded-4">
@@ -346,7 +356,9 @@
                                 </div>
                             </div>
                         </div>
-                        {% endif %}
+                        <!-- END STUDY MATERIALS MODAL -->
+                        
+                    {% endif %}
                     
                 </div>
                 {% endfor %}
@@ -471,6 +483,7 @@
 
     </div>
 
+    <!-- PROFILE MODAL WITH DETAILED COURSE & FEE BREAKDOWN -->
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 25px; overflow: hidden;">
@@ -596,17 +609,5 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const today = new Date();
-            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 5);
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            const formattedDate = nextMonth.toLocaleDateString('en-US', options);
-            const dateElements = document.querySelectorAll('.emi-due-date');
-            dateElements.forEach(function(el) {
-                el.innerHTML = '<i class="fas fa-clock me-1"></i> ' + formattedDate;
-            });
-        });
-    </script>
 </body>
 </html>
