@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,6 +109,19 @@
         footer { background: #0d1b2a; color: #e0e1dd; padding: 80px 0 30px; margin-top: 80px; border-top: 4px solid #00d4ff; }
         .footer-link { color: #adb5bd; text-decoration: none; transition: 0.3s; display: block; margin-bottom: 10px; }
         .footer-link:hover { color: #00d4ff; padding-left: 5px; }
+
+        /* Mobile Optimization Fixes */
+        @media (max-width: 768px) {
+            .dashboard-header { padding: 30px 20px; text-align: center; }
+            .dashboard-header h1 { font-size: 1.8rem !important; }
+            .dashboard-header::after { font-size: 100px; opacity: 0.05; right: -5%; }
+            .navbar-nav { padding-top: 15px; }
+            .navbar-nav .btn { width: 100%; display: block; margin: 8px 0 !important; }
+            .alert-danger { flex-direction: column !important; text-align: center; }
+            .alert-danger button { width: 100%; margin-top: 15px; }
+            .card-body.d-flex { flex-direction: column !important; text-align: center; }
+            .card-body.d-flex a { width: 100%; margin-top: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -312,7 +326,6 @@
                             </div>
                         </div>
 
-                        <!-- STUDY MATERIALS MODAL FOR THIS SPECIFIC COURSE -->
                         <div class="modal fade" id="materialsModal{{ enroll.id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content border-0 shadow-lg rounded-4">
@@ -356,7 +369,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- END STUDY MATERIALS MODAL -->
                         
                     {% endif %}
                     
